@@ -5,8 +5,8 @@ var lvl = {
 	rows: 6,
 	cols: 8,
 	objs: {
-		"1,2e": "w",
-		"5,1s": "w",
+		"1,2": "w",
+		"5,2": "s",
 		"6,1s": "w",
 		"1,4e": "w",
 		"1,5e": "w",
@@ -24,20 +24,29 @@ var lvl = {
 	types: {
 		"plr": {
 			move: "grav"
-		},
-		"goal": {
 		}
 	},
 	collisions: {
-		"plr-goal": ["reachgoal"],
-		"plr-w": ["hitwall"]
+		"plr-goal":{
+			"effectsets": ["reachgoal"],
+			"kind": "on"
+		},
+		"plr-w": {
+			"effectset": ["hitwall"],
+			"kind": "nextto"
+		},
+		"plr-s": {
+			"effectset": ["hitwall"],
+			"kind": "on"
+		}
 	},
 	effectsets: {
 		"reachgoal": {
-			"gameeffects": ["reachgoal"]
+			"gameeffects": ["reachgoal"],
+			"obj1effects": ["hitwall"]
 		},
 		"hitwall": {
-			"objeffects": ["hitwall"]
+			"obj1effects": ["hitwall"]
 		}
 	},
 	gameeffects: {

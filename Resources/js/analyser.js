@@ -3,34 +3,47 @@
 	lab.serialiseState = function(state) {
 		return JSON.stringify(state);
 	};
-	lab.analyseMove = function(lvl, state, dir){
-		var newstate, transition = {}, entitystatuses = {}, sqrs = 0;
+	lab.cloneObj = function(obj){
+		var clone = obj.constructor === [].constructor ? [] : {};
+		for(var p in obj){
+			clone[p] = typeof obj[p] === "object" ? lab.cloneObj(obj[p]) : obj[p];
+		}
+		return clone;
+	};
+	lab.findCollisions = function(lvl,state,entitystatuses,entity){
+		var collisionkeys = [];
+		// TODO - find collisions
+		return collisionkeys;
+	};
+	lab.performCollision = function(lvl,state,entitystatuses,anims,collisionkey){
+		var changes = {};
+		return changes;
+	};
+	lab.analyseMove = function(lvl, startstate, dir){
+		var newstate, anims = {}, movestate = lab.cloneObj(state), sqrs = 0, before = true;
 		// set all startdirs
 		for(var e in lvl.entities){
-			entitystatuses[e] = {
-				x: state.entities[e].x,
-				y: state.entities[e].y,
-				type: state.entities[e].type || lvl.entities[e].type
-			};
+			movestate.entities[e].type = state.entities[e].type || lvl.entities[e].type;
 			if (lvl.types[state.entities[e].type].move === "grav"){ // set all that will fall with gravity
-				entitystatuses[e].dir = dir;
-				entitystatuses[e].movestarted = 0;
+				movestate.entities[e].dir = dir;
+				movestate.entities[e].movestarted = 0;
 			}
 		}
 		do {
 			var sthmoved = false;
 			for(e in lvl.entities){
-				if (entitystatuses[e].dir){
+				if (movestate.entities[e].dir){
 					sthmoved = true;
 					
 				}
 			}
+			before = !before;
 			sqrs++;
 		}
 		while(sthmoved);
 		return {
 			state: newstate,
-			transition: transition
+			anims: anims
 		};
 	};
 	lab.analyseLevel = function(lvl){
@@ -68,7 +81,7 @@
 			}
 			analysis.states[key].moves[d] = {
 				target: end ? end : targetkey,
-				transition: moveresult.transition
+				anims: moveresult.anims
 			};
 		}
 		return {
