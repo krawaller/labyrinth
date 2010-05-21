@@ -4,20 +4,23 @@
 		return JSON.stringify(state);
 	};
 	lab.cloneObj = function(obj){
-		var clone = obj.constructor === [].constructor ? [] : {};
+		var clone = new obj.constructor();
 		for(var p in obj){
 			clone[p] = typeof obj[p] === "object" ? lab.cloneObj(obj[p]) : obj[p];
 		}
 		return clone;
 	};
-	lab.findCollisions = function(lvl,state,entitystatuses,entity){
-		var collisionkeys = [];
+	lab.findCollisions = function(lvl,state,entity,before){
+		var collisions = {}; // key: {obj1: xxx, obj2: xxx}
 		// TODO - find collisions
 		return collisionkeys;
 	};
-	lab.performCollision = function(lvl,state,entitystatuses,anims,collisionkey){
-		var changes = {};
-		return changes;
+	lab.performCollision = function(lvl,state,anims,collisionkey,obj1,obj2){
+		// TODO - update state & anims
+		return {
+			state: state,
+			anims: anims
+		};
 	};
 	lab.analyseMove = function(lvl, startstate, dir){
 		var newstate, anims = {}, movestate = lab.cloneObj(state), sqrs = 0, before = true;
@@ -27,18 +30,36 @@
 			if (lvl.types[state.entities[e].type].move === "grav"){ // set all that will fall with gravity
 				movestate.entities[e].dir = dir;
 				movestate.entities[e].movestarted = 0;
+				anim[0].slides = anim[0].slides || {};
+				anims[0].slides[e] = {x: movestate.entities[e].x, y: movestate.entities[e].y};
 			}
 		}
 		do {
-			var sthmoved = false;
+			var sthmoving = false;
 			for(e in lvl.entities){
-				if (movestate.entities[e].dir){
-					sthmoved = true;
-					
+				var entitydir = movestate.entities[e].dir;
+				if (entitydir){
+					if (!before){
+						var fac = [[0,-1],[1,0],[0,1],[-1,0]];
+						movestate.entities[e].x += fac[entitydir][0];
+						movestate.entities[e].y += fac[entitydir][1];
+						anims[movestate.entities[e].movestarted].slides[e].x = movestate.entities[e].x;
+						anims[movestate.entities[e].movestarted].slides[e].y = movestate.entities[e].y;
+					}
+					var collisions = lab.findCollisions(lvl,movestate,e,before);
+					for(var c in collisions){
+						var collisionresult = lab.performCollision(lvl,movestate,anims,collisions[c].key,collisions[c].obj1,collisions[c].obj2);
+						movestate = collisionresult.state;
+						anims = collisionresult.anims;
+					}
+					if (movestate.entities[e].dir){ // we're still on the move! :)
+						sthmoving = true;
+					}
+					// TODO: update movestate & anims 
 				}
 			}
+			sqrs += before ? 0 : 1;
 			before = !before;
-			sqrs++;
 		}
 		while(sthmoved);
 		return {
@@ -89,6 +110,7 @@
 			key: key
 		};
 	};
+	
 	window.lab = lab;
 })();
 
