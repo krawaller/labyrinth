@@ -193,9 +193,7 @@ window.lab = (function(lab){
                     analysis = stateresult.analysis;
                     targetkey = stateresult.key;
                 }
-                if (analysis.states[targetkey].steps > step) {
-                    analysis.states[targetkey].steps = step;
-                }
+                analysis.states[targetkey].steps = Math.min(analysis.states[targetkey].steps,step);
             }
             analysis.states[key].moves[d] = {
                 target: end ? end : targetkey,
