@@ -61,6 +61,37 @@ window.lab = (function(lab){
         return state;
     };
     
+    
+    /**
+     * calculates what type a given entity is at this moment
+     * @param {Object} lvl
+     * @param {Object} state
+     * @param {string} entitykey
+     * @returns {string} type
+     */
+    lab.getEntityType = function(lvl, state, entitykey){
+        var type;
+        // TODO - calculate type
+        return type;
+    };
+    
+    /**
+     * Calculates what dir an entity would (eventually) start to move in when a move is made
+     * @param {Object} lvl
+     * @param {Object} state
+     * @param {int} dir
+     * @param {string} entitykey
+     * @returns {int} dir
+     */
+    lab.getEntityStartDir = function(lvl, state, dir, entitykey){
+        var ret = 0, type = lab.getEntityType(lvl,state,entitykey);
+        if (lvl.types[type].move === "grav"){
+            ret = dir;
+        }
+        // TODO - add support for float and other things
+        return ret;
+    };
+    
     /**
      * Takes a state and moves in a given direction
      * @param {Object} lvl
@@ -69,12 +100,12 @@ window.lab = (function(lab){
      * @returns {Object} an object containing updated state & anims
      */
     lab.analyseMove = function(lvl, state, dir){
-        var anims = {}, movestate = lab.cloneObj(state), sqrs = 0, before = true;
+        var anims = {}, movestate = lab.cloneObj(state), sqrs = 0, before = true, movedir;
         // set all startdirs
         for(var e in lvl.entities){
-            movestate.entities[e].type = state.entities[e].type || lvl.entities[e].type;
-            if (lvl.types[state.entities[e].type].move === "grav"){ // set all that will fall with gravity
-                movestate.entities[e].dir = dir;
+            movedir = lab.getEntityStartDir(lvl,state,dir,e);
+            if (movedir){
+                movestate.entities[e].dir = movedir;
                 movestate.entities[e].movestarted = 0;
                 anim[0].slides = anim[0].slides || {};
                 anims[0].slides[e] = {x: movestate.entities[e].x, y: movestate.entities[e].y};
