@@ -1,8 +1,18 @@
 window.lab = (function(lab){
-	lab = lab || {};
+	/**
+	 * takes a state object and serialises it
+	 * @param {Object} state
+	 * @returns {string} the serialised object
+	 */
 	lab.serialiseState = function(state) {
 		return JSON.stringify(state);
 	};
+	
+	/**
+	 * returns a deep-copied clone
+	 * @param {Object} obj
+	 * @returns {Object} clone
+	 */
 	lab.cloneObj = function(obj){
 		var clone = new obj.constructor();
 		for(var p in obj){
@@ -10,23 +20,55 @@ window.lab = (function(lab){
 		}
 		return clone;
 	};
+	
+	/**
+	 * finds all collisions for the given entity and builds collision objects
+	 * @param {Object} lvl
+	 * @param {Object} state
+	 * @param {string} entity
+	 * @param {bool} before
+	 * @returns {array} collisions an array of collision objects
+	 */
 	lab.findCollisions = function(lvl,state,entity,before){
-		var collisions = {}; // key: {obj1: xxx, obj2: xxx}
-		// TODO - find collisions
-		return collisionkeys;
+		var collisions = []; // key: {obj1: xxx, obj2: xxx}
+		// TODO - find collisions with given entity
+		return collisions;
 	};
-	lab.performCollision = function(lvl,state,anims,collisionkey,obj1,obj2){
+	
+	/**
+	 * performs the given collisions and returns updated state & anims objects
+	 * @param {Object} lvl
+	 * @param {Object} state
+	 * @param {Object} anims
+	 * @param {Object} collision
+	 * @returns {Object} an object containing updated state & anims
+	 */
+	lab.performCollision = function(lvl,state,anims,collision){ // collision object contains key,obj1,obj2
 		// TODO - update state & anims
 		return {
 			state: state,
 			anims: anims
 		};
 	};
+	
+	/**
+	 * takes a state object and removes all properties not to be included when saved (like in-move data)
+	 * @param {Object} state
+	 * @returns {Object} updatedstate
+	 */
 	lab.removeNonSaveStateProperties = function(state){
 		// TODO - remove move-related properties from state
 		return state;
 	};
-	lab.analyseMove = function(lvl, startstate, dir){
+	
+	/**
+	 * Takes a state and moves in a given direction
+	 * @param {Object} lvl
+	 * @param {Object} state
+	 * @param {int} dir The direction to move in (1-4)
+	 * @returns {Object} an object containing updated state & anims
+	 */
+	lab.analyseMove = function(lvl, state, dir){
 		var anims = {}, movestate = lab.cloneObj(state), sqrs = 0, before = true;
 		// set all startdirs
 		for(var e in lvl.entities){
@@ -52,7 +94,7 @@ window.lab = (function(lab){
 					}
 					var collisions = lab.findCollisions(lvl,movestate,e,before);
 					for(var c in collisions){
-						var collisionresult = lab.performCollision(lvl,movestate,anims,collisions[c].key,collisions[c].obj1,collisions[c].obj2);
+						var collisionresult = lab.performCollision(lvl,movestate,anims,collisions[c]);
 						movestate = collisionresult.state;
 						anims = collisionresult.anims;
 					}
@@ -71,14 +113,35 @@ window.lab = (function(lab){
 			anims: anims
 		};
 	};
+	
+	/**
+	 * Analyses a level, creating the full state structure with inbetween transitions
+	 * @param {Object} lvl
+	 * @returns {Object} analysis
+	 */
 	lab.analyseLevel = function(lvl){
-		return lab.analyse(lvl, lab.buildStartState(lvl), {statekeys: {},states: {}	}, 1);
+		return lab.analyse(lvl, lab.buildStartState(lvl), {statekeys: {},states: {}	}, 1).analysis;
 	};
+	
+	/**
+	 * Build a starting state object for a given level
+	 * @param {Object} lvl
+	 * @returns {Object} state
+	 */
 	lab.buildStartState = function(lvl){
 		var state = {};
 		// TODO - build start state for lvl
 		return state;
 	};
+	
+	/**
+	 * updates an analysis for the given state
+	 * @param {Object} lvl
+	 * @param {Object} state
+	 * @param {Object} analysis
+	 * @param {Number} step
+	 * @returns {Object} object containing updated analysis and key for the analysed state
+	 */
 	lab.analyse = function(lvl, state, analysis, step){
 		var serialisedstate = serialiseState(state), key = analysis.statekeys.nextkey++;
 		analysis.states[key] = {
@@ -114,5 +177,5 @@ window.lab = (function(lab){
 		};
 	};
 	
-})(window.lab);
+})(window.lab || {});
 
