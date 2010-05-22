@@ -120,7 +120,7 @@ window.lab = (function(lab){
 	 * @returns {Object} analysis
 	 */
 	lab.analyseLevel = function(lvl){
-		return lab.analyse(lvl, lab.buildStartState(lvl), {statekeys: {},states: {}	}, 1).analysis;
+		return lab.analyse(lvl, lab.buildStartState(lvl), {statekeys: {nextstatekey:0},states:{}}, 1).analysis;
 	};
 	
 	/**
@@ -135,7 +135,7 @@ window.lab = (function(lab){
 	};
 	
 	/**
-	 * updates an analysis for the given state
+	 * updates an analysis for the given state. will also recursively analyse new states reached.
 	 * @param {Object} lvl
 	 * @param {Object} state
 	 * @param {Object} analysis
