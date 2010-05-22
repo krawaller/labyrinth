@@ -80,8 +80,8 @@ window.lab = (function(lab){
                 anims[0].slides[e] = {x: movestate.entities[e].x, y: movestate.entities[e].y};
             }
         }
+        var sthmoving = false;
         do {
-            var sthmoving = false;
             for(e in lvl.entities){
                 var entitydir = movestate.entities[e].dir;
                 if (entitydir){
@@ -107,7 +107,7 @@ window.lab = (function(lab){
             sqrs += before ? 0 : 1;
             before = !before;
         }
-        while(sthmoved);
+        while(sthmoving);
         return {
             state: lab.removeNonSaveStateProperties(movestate),
             anims: anims
