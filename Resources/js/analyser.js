@@ -1,5 +1,5 @@
-(function(){
-	var lab = window.lab || {};
+window.lab = (function(lab){
+	lab = lab || {};
 	lab.serialiseState = function(state) {
 		return JSON.stringify(state);
 	};
@@ -22,8 +22,12 @@
 			anims: anims
 		};
 	};
+	lab.removeNonSaveStateProperties = function(state){
+		// TODO - remove move-related properties from state
+		return state;
+	};
 	lab.analyseMove = function(lvl, startstate, dir){
-		var newstate, anims = {}, movestate = lab.cloneObj(state), sqrs = 0, before = true;
+		var anims = {}, movestate = lab.cloneObj(state), sqrs = 0, before = true;
 		// set all startdirs
 		for(var e in lvl.entities){
 			movestate.entities[e].type = state.entities[e].type || lvl.entities[e].type;
@@ -55,7 +59,7 @@
 					if (movestate.entities[e].dir){ // we're still on the move! :)
 						sthmoving = true;
 					}
-					// TODO: update movestate & anims 
+					// TODO: update movestate & anims for new/changed moves
 				}
 			}
 			sqrs += before ? 0 : 1;
@@ -63,18 +67,17 @@
 		}
 		while(sthmoved);
 		return {
-			state: newstate,
+			state: lab.removeNonSaveStateProperties(movestate),
 			anims: anims
 		};
 	};
 	lab.analyseLevel = function(lvl){
-		var startstate, analysis;
-		startstate = {}; // TODO fix!
-		analysis = {
-			statekeys: {},
-			states: {}
-		};
-		return lab.analyse(lvl, startstate, analysis, 1);
+		return lab.analyse(lvl, lab.buildStartState(lvl), {statekeys: {},states: {}	}, 1);
+	};
+	lab.buildStartState = function(lvl){
+		var state = {};
+		// TODO - build start state for lvl
+		return state;
 	};
 	lab.analyse = function(lvl, state, analysis, step){
 		var serialisedstate = serialiseState(state), key = analysis.statekeys.nextkey++;
@@ -111,6 +114,5 @@
 		};
 	};
 	
-	window.lab = lab;
-})();
+})(window.lab);
 
