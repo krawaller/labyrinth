@@ -100,7 +100,7 @@ window.lab = (function(lab){
      * @returns {Object} an object containing updated state & anims
      */
     lab.analyseMove = function(lvl, state, dir){
-        var anims = {}, movestate = lab.cloneObj(state), sqrs = 0, before = true, movedir;
+        var anims = {}, movestate = lab.cloneObj(state), sqrs = 0, before = true, movedir, sthmoving;
         // set all startdirs
         for(var e in lvl.entities){
             movedir = lab.getEntityStartDir(lvl,state,dir,e);
@@ -111,8 +111,8 @@ window.lab = (function(lab){
                 anims[0].slides[e] = {x: movestate.entities[e].x, y: movestate.entities[e].y};
             }
         }
-        var sthmoving = false;
         do {
+            sthmoving = false;
             for(e in lvl.entities){
                 var entitydir = movestate.entities[e].dir;
                 if (entitydir){
