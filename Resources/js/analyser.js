@@ -57,7 +57,11 @@ window.lab = (function(lab){
      * @returns {Object} updatedstate
      */
     lab.removeNonSaveStateProperties = function(state){
-        // TODO - remove move-related properties from state
+        // TODO - need to remove more properties?
+        for(var e in state.entities){
+            delete state.entities[e].dir;
+            delete state.entities[e].movestarted;
+        }
         return state;
     };
     
