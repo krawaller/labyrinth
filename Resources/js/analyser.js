@@ -289,7 +289,6 @@ window.lab = (function(lab){
      * @returns {Object} object containing updated analysis and key for the analysed state
      */
     lab.analyse = function(lvl, state, analysis, step){
-console.log(step,state,analysis);
         var serialisedstate = lab.serialiseState(state), key = analysis.statekeys.nextkey++;
         analysis.states[key] = {
             state: state,
@@ -298,18 +297,14 @@ console.log(step,state,analysis);
         };
         analysis.statekeys[serialisedstate] = key;
         for (var d = 1; d <= 4; d++) {
-console.log(step,key,d);
             var moveresult, targetserialised, targetkey, end;
             moveresult = lab.analyseMove(lvl, state, d);
             end = moveresult.state.end;
-console.log(moveresult,end);
             if (!end) { // game did not end, so we reached another state
                 targetserialised = lab.serialiseState(moveresult.state);
                 targetkey = analysis.statekeys[targetserialised];
                 if (!targetkey) { // reached unanalysed state
-console.log("Gonna recurse!");
                     var stateresult = lab.analyse(lvl, moveresult.state, analysis, step + 1);
-console.log("recurserd!",stateresult);
                     analysis = stateresult.analysis;
                     targetkey = stateresult.key;
                 }
