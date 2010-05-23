@@ -4,16 +4,8 @@ var lvl = {
 	title: "testlevel",
 	rows: 6,
 	cols: 8,
-	objs: {
-		"1,2": "w",
-		"5,2": "s",
-		"6,1s": "w",
-		"1,4e": "w",
-		"1,5e": "w",
-		"2,5s": "w",
-		"5,5e": "w",
-		"7,4e": "w",
-		"7,5s": "w",
+	borders: ["5,1s","6,1s","1,2e","1,4e","1,5e","2,5s","5,5e","7,4e","7,5s"],
+    squares: {
 		"7,2": "goal"
 	},
 	entities: [{
@@ -64,7 +56,7 @@ var lvl = {
 /**************/ module("Static array methods"); /*******************************************************/
 
 test("lab analyser methods are declare",function(){
-		equals(typeof x,"number","x is 7");
+	equals(typeof x,"number","x is 7");
 	equals(typeof lab.analyse,"function","analyse function exists");
 	equals(typeof lab.analyseLevel,"function","analyseLevel function exists");
 	equals(typeof lab.analyseMove,"function","analyseMove function exists");

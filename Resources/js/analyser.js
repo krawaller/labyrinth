@@ -1,6 +1,6 @@
 window.lab = (function(lab){
     
-     var fac = [[0,-1],[1,0],[0,1],[-1,0]];
+     var fac = [666,[0,-1],[1,0],[0,1],[-1,0]];
     
     /**
      * takes a state object and serialises it
@@ -9,6 +9,21 @@ window.lab = (function(lab){
      */
     lab.serialiseState = function(state) {
         return JSON.stringify(state);
+    };
+    
+    /**
+     * Checks an array for a value
+     * @param {Object} needle
+     * @param {Array} haystack
+     * @returns {bool} whether or not needle was found
+     */
+    lab.inArray = function(needle,haystack){
+        for(var i in haystack){
+            if (haystack[i]==needle){
+                return true;
+            }
+        }
+        return false;
     };
     
     /**
@@ -24,6 +39,13 @@ window.lab = (function(lab){
         return clone;
     };
     
+    lab.calculateBorderName = function(x,y,dir){
+        if (dir==1 || dir==4){
+            return (x+fac[dir][0])+","+(y+fac[dir][1])+(dir==1?"s":"e");
+        }
+        return x+","+y+(dir==2?"e":"s");
+    };
+    
     /**
      * finds all collisions for the given entity and builds collision objects
      * @param {Object} lvl
@@ -37,29 +59,39 @@ window.lab = (function(lab){
             dir = state.entities[entitykey].dir,
             x = state.entities[entitykey].x, // + before ? fac[dir][0] : 0,
             y = state.entities[entitykey].y, // + before ? fac[dir][1] : 0;
-            potentials = [],
             type = lab.getEntityType(lvl,state,entitykey),
             otherkey,
             othertype;
         if (before){ // borders, and next square with nextto prop
-            x += fac[dir][0];
-            y += fac[dir][1];   
-            otherkey = x+","+y;
-            othertype = lab.getObjectType(otherkey);
-            collision = lvl.collisions[entitykey+"-"+othertype];
-            if (collision && lvl.collisions[collision].kind == "on"){
-                collisions.push({key: collision,'with':otherkey});
-            }    
+            // find borders
+            if (lab.inArray(lab.calculateBorderName(x,y,dir),lvl.borders)){ // hit a border!
+                collisions.push({key:"BORDER"});
+            }
+            // find squares
+            otherkey = (x+fac[dir][0])+","+(y+fac[dir][1]);
+            othertype = lab.getSquareType(lvl,state,otherkey);
+            if (othertype) { // hit a square!
+                collision = lvl.collisions[entitykey + "-" + othertype];
+                if (collision && lvl.collisions[collision].kind != "on") {
+                    collisions.push({
+                        key: collision,
+                        'with': otherkey
+                    });
+                }
+            }
             // TODO - also check for entities on next square with correct dir     
         }
         else { // current square and entities on same square
             otherkey = x+","+y;
-            othertype = lab.getObjectType(otherkey);
+            othertype = lab.getSquareType(lvl,state,otherkey);
             collision = lvl.collisions[entitykey+"-"+othertype];
             if (collision && lvl.collisions[collision].kind == "on"){
                 collisions.push({key: collision,'with':otherkey});
             }
             // TODO - also check here for entities on same square
+        }
+        for(var c in collisions){
+            collisions[c].me = entitykey;
         }
         return collisions;
     };
@@ -73,7 +105,10 @@ window.lab = (function(lab){
      * @returns {Object} an object containing updated state & anims
      */
     lab.performCollision = function(lvl,state,anims,collision){ // collision object contains key,obj1,obj2
-        // TODO - update state & anims
+        if (collision.key=="BORDER"){
+            state.entities[collision.me].dir = 0;
+        }
+        // TODO - add support for non-border collisions
         return {
             state: state,
             anims: anims
@@ -82,14 +117,18 @@ window.lab = (function(lab){
     
     /**
      * takes a state object and removes all properties not to be included when saved (like in-move data)
+     * @param {Object} lvl
      * @param {Object} state
      * @returns {Object} updatedstate
      */
-    lab.removeNonSaveStateProperties = function(state){
+    lab.removeNonSaveStateProperties = function(lvl,state){
         // TODO - need to remove more properties?
         for(var e in state.entities){
             delete state.entities[e].dir;
             delete state.entities[e].movestarted;
+            if (state.entities.type == lvl.entities[e].type){
+                delete state.entities.type; // only need to store type in state if different from starttype
+            }
         }
         return state;
     };
@@ -110,15 +149,15 @@ window.lab = (function(lab){
     };
     
     /**
-     * calculates what type a given object is at this moment
+     * calculates what type a given Square is at this moment
      * @param {Object} lvl
      * @param {Object} state
-     * @param {string} objectkey
+     * @param {string} squarekey
      * @returns {string} type
      */
-    lab.getObjectType = function(lvl, state, objectkey){
+    lab.getSquareType = function(lvl, state, squarekey){
         var type;
-        type = lvl.objs[objectkey];
+        type = lvl.squares[squarekey];
         // TODO - add support for conditionals
         return type;
     };
@@ -133,11 +172,27 @@ window.lab = (function(lab){
      */
     lab.getEntityStartDir = function(lvl, state, dir, entitykey){
         var ret = 0, type = lab.getEntityType(lvl,state,entitykey);
+        if (type == "dead"){
+            return 0;
+        }
         if (lvl.types[type].move === "grav"){
             ret = dir;
         }
         // TODO - add support for float and other things
         return ret;
+    };
+    
+    /**
+     * Tests if an entity hasn't gone overe the edge
+     * @param {Object} lvl
+     * @param {Object} state
+     * @param {string} entitykey
+     * @bool if entity is within level limits or not
+     */
+    lab.testIfOutOfBounds = function(lvl,state,entitykey){
+        var x = state.entities[entitykey].x,
+            y = state.entities[entitykey].y;
+        return x> lvl.cols || x<1 || y > lvl.rows || y < 1;
     };
     
     /**
@@ -148,14 +203,14 @@ window.lab = (function(lab){
      * @returns {Object} an object containing updated state & anims
      */
     lab.analyseMove = function(lvl, state, dir){
-        var anims = {}, movestate = lab.cloneObj(state), sqrs = 0, before = true, movedir, sthmoving;
+        var anims = {0:{}}, movestate = lab.cloneObj(state), step = 0, before = true, movedir, sthmoving;
         // set all startdirs
         for(var e in lvl.entities){
             movedir = lab.getEntityStartDir(lvl,state,dir,e);
             if (movedir){
                 movestate.entities[e].dir = movedir;
                 movestate.entities[e].movestarted = 0;
-                anim[0].slides = anim[0].slides || {};
+                anims[0].slides = anims[0].slides || {};
                 anims[0].slides[e] = {x: movestate.entities[e].x, y: movestate.entities[e].y};
             }
         }
@@ -176,18 +231,25 @@ window.lab = (function(lab){
                         movestate = collisionresult.state;
                         anims = collisionresult.anims;
                     }
+                    if (lab.testIfOutOfBounds(lvl,movestate,e)){
+                        movestate.entities[e].type = type = "dead";
+                        movestate.entities[e].dir = 0;
+                        anims[step] = anims[step] || {changes:{}};
+                        anims[step].changes[e] = "dead";
+                        movestate.end = "GAMEOVER"; // TODO - only do this if it was plr that died
+                    }
                     if (movestate.entities[e].dir){ // we're still on the move! :)
                         sthmoving = true;
                     }
                     // TODO: update movestate & anims for new/changed moves
                 }
             }
-            sqrs += before ? 0 : 1;
+            step += before ? 0 : 1;
             before = !before;
         }
         while(sthmoving);
         return {
-            state: lab.removeNonSaveStateProperties(movestate),
+            state: lab.removeNonSaveStateProperties(lvl,movestate),
             anims: anims
         };
     };
@@ -198,7 +260,7 @@ window.lab = (function(lab){
      * @returns {Object} analysis
      */
     lab.analyseLevel = function(lvl){
-        return lab.analyse(lvl, lab.buildStartState(lvl), {statekeys: {nextstatekey:0},states:{}}, 1).analysis;
+        return lab.analyse(lvl, lab.buildStartState(lvl), {statekeys: {nextkey:0},states:{}}, 1).analysis;
     };
     
     /**
@@ -207,7 +269,13 @@ window.lab = (function(lab){
      * @returns {Object} state
      */
     lab.buildStartState = function(lvl){
-        var state = {};
+        var state = {entities:{}};
+        for(var e in lvl.entities){
+            state.entities[e] = {
+                x : lvl.entities[e].x,
+                y : lvl.entities[e].y
+            };
+        }
         // TODO - build start state for lvl
         return state;
     };
@@ -221,7 +289,8 @@ window.lab = (function(lab){
      * @returns {Object} object containing updated analysis and key for the analysed state
      */
     lab.analyse = function(lvl, state, analysis, step){
-        var serialisedstate = serialiseState(state), key = analysis.statekeys.nextkey++;
+console.log(step,state,analysis);
+        var serialisedstate = lab.serialiseState(state), key = analysis.statekeys.nextkey++;
         analysis.states[key] = {
             state: state,
             moves: {},
@@ -229,14 +298,18 @@ window.lab = (function(lab){
         };
         analysis.statekeys[serialisedstate] = key;
         for (var d = 1; d <= 4; d++) {
+console.log(step,key,d);
             var moveresult, targetserialised, targetkey, end;
             moveresult = lab.analyseMove(lvl, state, d);
             end = moveresult.state.end;
+console.log(moveresult,end);
             if (!end) { // game did not end, so we reached another state
                 targetserialised = lab.serialiseState(moveresult.state);
                 targetkey = analysis.statekeys[targetserialised];
                 if (!targetkey) { // reached unanalysed state
-                    var stateresult = analyse(lvl, moveresult.state, analysis, step + 1);
+console.log("Gonna recurse!");
+                    var stateresult = lab.analyse(lvl, moveresult.state, analysis, step + 1);
+console.log("recurserd!",stateresult);
                     analysis = stateresult.analysis;
                     targetkey = stateresult.key;
                 }
@@ -252,6 +325,8 @@ window.lab = (function(lab){
             key: key
         };
     };
+    
+    return lab;
     
 })(window.lab || {});
 
