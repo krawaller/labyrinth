@@ -1,4 +1,7 @@
 window.lab = (function(lab){
+    
+     var fac = [[0,-1],[1,0],[0,1],[-1,0]];
+    
     /**
      * takes a state object and serialises it
      * @param {Object} state
@@ -25,13 +28,39 @@ window.lab = (function(lab){
      * finds all collisions for the given entity and builds collision objects
      * @param {Object} lvl
      * @param {Object} state
-     * @param {string} entity
+     * @param {string} entitykey
      * @param {bool} before
      * @returns {array} collisions an array of collision objects
      */
-    lab.findCollisions = function(lvl,state,entity,before){
-        var collisions = []; // key: {obj1: xxx, obj2: xxx}
-        // TODO - find collisions with given entity
+    lab.findCollisions = function(lvl,state,entitykey,before){
+        var collisions = [], // key: {obj1: xxx, obj2: xxx}
+            dir = state.entities[entitykey].dir,
+            x = state.entities[entitykey].x, // + before ? fac[dir][0] : 0,
+            y = state.entities[entitykey].y, // + before ? fac[dir][1] : 0;
+            potentials = [],
+            type = lab.getEntityType(lvl,state,entitykey),
+            otherkey,
+            othertype;
+        if (before){ // borders, and next square with nextto prop
+            x += fac[dir][0];
+            y += fac[dir][1];   
+            otherkey = x+","+y;
+            othertype = lab.getObjectType(otherkey);
+            collision = lvl.collisions[entitykey+"-"+othertype];
+            if (collision && lvl.collisions[collision].kind == "on"){
+                collisions.push({key: collision,'with':otherkey});
+            }    
+            // TODO - also check for entities on next square with correct dir     
+        }
+        else { // current square and entities on same square
+            otherkey = x+","+y;
+            othertype = lab.getObjectType(otherkey);
+            collision = lvl.collisions[entitykey+"-"+othertype];
+            if (collision && lvl.collisions[collision].kind == "on"){
+                collisions.push({key: collision,'with':otherkey});
+            }
+            // TODO - also check here for entities on same square
+        }
         return collisions;
     };
     
@@ -75,7 +104,22 @@ window.lab = (function(lab){
      */
     lab.getEntityType = function(lvl, state, entitykey){
         var type;
-        // TODO - calculate type
+        type = state.entities[entitykey].type || lvl.entities[entitykey].type;
+        // TODO - add support for conditionals
+        return type;
+    };
+    
+    /**
+     * calculates what type a given object is at this moment
+     * @param {Object} lvl
+     * @param {Object} state
+     * @param {string} objectkey
+     * @returns {string} type
+     */
+    lab.getObjectType = function(lvl, state, objectkey){
+        var type;
+        type = lvl.objs[objectkey];
+        // TODO - add support for conditionals
         return type;
     };
     
@@ -121,7 +165,6 @@ window.lab = (function(lab){
                 var entitydir = movestate.entities[e].dir;
                 if (entitydir){
                     if (!before){
-                        var fac = [[0,-1],[1,0],[0,1],[-1,0]];
                         movestate.entities[e].x += fac[entitydir][0];
                         movestate.entities[e].y += fac[entitydir][1];
                         anims[movestate.entities[e].movestarted].slides[e].x = movestate.entities[e].x;
