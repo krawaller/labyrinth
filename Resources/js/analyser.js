@@ -57,8 +57,8 @@ window.lab = (function(lab){
     lab.findCollisions = function(lvl,state,entitykey,before){
         var collisions = [], // key: {obj1: xxx, obj2: xxx}
             dir = state.entities[entitykey].dir,
-            x = state.entities[entitykey].x, // + before ? fac[dir][0] : 0,
-            y = state.entities[entitykey].y, // + before ? fac[dir][1] : 0;
+            x = state.entities[entitykey].x, 
+            y = state.entities[entitykey].y, 
             type = lab.getEntityType(lvl,state,entitykey),
             otherkey,
             othertype;
@@ -203,15 +203,19 @@ window.lab = (function(lab){
      * @returns {Object} an object containing updated state & anims
      */
     lab.analyseMove = function(lvl, state, dir){
-        var anims = {0:{}}, movestate = lab.cloneObj(state), step = 0, before = true, movedir, sthmoving;
+        var anims = {0:{slides:{}}}, movestate = lab.cloneObj(state), step = 0, before = true, movedir, sthmoving;
         // set all startdirs
         for(var e in lvl.entities){
             movedir = lab.getEntityStartDir(lvl,state,dir,e);
             if (movedir){
                 movestate.entities[e].dir = movedir;
                 movestate.entities[e].movestarted = 0;
-                anims[0].slides = anims[0].slides || {};
-                anims[0].slides[e] = {x: movestate.entities[e].x, y: movestate.entities[e].y};
+                anims[0].slides[e] = {
+                    x: movestate.entities[e].x,
+                    y: movestate.entities[e].y,
+                    sqrs: 0,
+                    dir:movedir
+                };
             }
         }
         do {
@@ -224,6 +228,7 @@ window.lab = (function(lab){
                         movestate.entities[e].y += fac[entitydir][1];
                         anims[movestate.entities[e].movestarted].slides[e].x = movestate.entities[e].x;
                         anims[movestate.entities[e].movestarted].slides[e].y = movestate.entities[e].y;
+                        anims[movestate.entities[e].movestarted].slides[e].sqrs++;
                     }
                     var collisions = lab.findCollisions(lvl,movestate,e,before);
                     for(var c in collisions){
@@ -260,7 +265,7 @@ window.lab = (function(lab){
      * @returns {Object} analysis
      */
     lab.analyseLevel = function(lvl){
-        return lab.analyse(lvl, lab.buildStartState(lvl), {statekeys: {nextkey:0},states:{}}, 1).analysis;
+        return lab.analyse(lvl, lab.buildStartState(lvl), {statekeys: {nbrofstates:0},states:{}}, 0).analysis;
     };
     
     /**
@@ -289,11 +294,11 @@ window.lab = (function(lab){
      * @returns {Object} object containing updated analysis and key for the analysed state
      */
     lab.analyse = function(lvl, state, analysis, step){
-        var serialisedstate = lab.serialiseState(state), key = analysis.statekeys.nextkey++;
+        var serialisedstate = lab.serialiseState(state), key = ++analysis.statekeys.nbrofstates;
         analysis.states[key] = {
             state: state,
             moves: {},
-            steps: step
+            steps: step++
         };
         analysis.statekeys[serialisedstate] = key;
         for (var d = 1; d <= 4; d++) {
@@ -304,7 +309,7 @@ window.lab = (function(lab){
                 targetserialised = lab.serialiseState(moveresult.state);
                 targetkey = analysis.statekeys[targetserialised];
                 if (!targetkey) { // reached unanalysed state
-                    var stateresult = lab.analyse(lvl, moveresult.state, analysis, step + 1);
+                    var stateresult = lab.analyse(lvl, moveresult.state, analysis, step);
                     analysis = stateresult.analysis;
                     targetkey = stateresult.key;
                 }
