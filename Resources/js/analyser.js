@@ -295,6 +295,7 @@ window.lab = (function(lab){
             before = !before;
         }
         while(sthmoving);
+        anims.steps = step;
         return {
             state: lab.removeNonSaveStateProperties(lvl,movestate),
             anims: anims
@@ -357,10 +358,8 @@ window.lab = (function(lab){
                 }
                 analysis.states[targetkey].steps = Math.min(analysis.states[targetkey].steps,step);
             }
-            analysis.states[key].moves[d] = {
-                target: end ? end : targetkey,
-                anims: moveresult.anims
-            };
+            moveresult.anims.target = end ? end : targetkey;
+            analysis.states[key].moves[d] = moveresult.anims;
         }
         return {
             analysis: analysis,
