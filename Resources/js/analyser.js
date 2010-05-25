@@ -39,11 +39,29 @@ window.lab = (function(lab){
         return clone;
     };
     
+    /**
+     * Returns the key for the border in the given direction from the given square
+     * @param {int} x
+     * @param {int} y
+     * @param {int} dir
+     * @returns {string} borderkey
+     */
     lab.calculateBorderName = function(x,y,dir){
         if (dir==1 || dir==4){
             return (x+fac[dir][0])+","+(y+fac[dir][1])+(dir==1?"s":"e");
         }
         return x+","+y+(dir==2?"e":"s");
+    };
+    
+    /**
+     * Tests if a given entity is the plr object (means game over if it dies, or win if reaches goal)
+     * @param {Object} lvl
+     * @param {Object} state
+     * @param {Object} entitykey
+     * @returns {bool} if entitykey is plr
+     */
+    lab.isPlr = function(lvl,state,entitykey){
+        return entitykey === '0';
     };
     
     /**
@@ -64,50 +82,72 @@ window.lab = (function(lab){
             othertype;
         if (before){ // borders, and next square with nextto prop
             // find borders
-            if (lab.inArray(lab.calculateBorderName(x,y,dir),lvl.borders)){ // hit a border!
-                collisions.push({key:"BORDER"});
+            if (lab.inArray(lab.calculateBorderName(x, y, dir), lvl.borders)) { // hit a border!
+                collisions.push({
+                    key: "BORDER"
+                });
             }
-            // find squares
-            otherkey = (x+fac[dir][0])+","+(y+fac[dir][1]);
+            else {
+                // find squares
+                otherkey = (x + fac[dir][0]) + "," + (y + fac[dir][1]);
+                othertype = lab.getSquareType(lvl, state, otherkey);
+                if (othertype) { // hit a square!
+                    collision = lvl.collisions[entitykey + "-" + othertype];
+                    if (collision && lvl.collisions[collision].kind != "on") {
+                        collisions.push({
+                            key: collision,
+                            'with': otherkey
+                        });
+                    }
+                }
+                // TODO - also check for entities on next square with correct dir     
+            }
+        }
+        else { // current square and entities on same square
+            otherkey = x+","+y;
             othertype = lab.getSquareType(lvl,state,otherkey);
-            if (othertype) { // hit a square!
+            if (othertype == "goal" && lab.isPlr(lvl,state,entitykey)) {
+                collisions.push({
+                    key: "GOAL"
+                });
+            }
+            else {
                 collision = lvl.collisions[entitykey + "-" + othertype];
-                if (collision && lvl.collisions[collision].kind != "on") {
+                if (collision && lvl.collisions[collision].kind == "on") {
                     collisions.push({
                         key: collision,
                         'with': otherkey
                     });
                 }
-            }
-            // TODO - also check for entities on next square with correct dir     
-        }
-        else { // current square and entities on same square
-            otherkey = x+","+y;
-            othertype = lab.getSquareType(lvl,state,otherkey);
-            collision = lvl.collisions[entitykey+"-"+othertype];
-            if (collision && lvl.collisions[collision].kind == "on"){
-                collisions.push({key: collision,'with':otherkey});
-            }
             // TODO - also check here for entities on same square
+            }
         }
         for(var c in collisions){
             collisions[c].me = entitykey;
         }
         return collisions;
     };
-    
+
     /**
      * performs the given collisions and returns updated state & anims objects
      * @param {Object} lvl
      * @param {Object} state
      * @param {Object} anims
      * @param {Object} collision
+     * @param {int} step
      * @returns {Object} an object containing updated state & anims
      */
-    lab.performCollision = function(lvl,state,anims,collision){ // collision object contains key,obj1,obj2
+    lab.performCollision = function(lvl,state,anims,collision,step){ // collision object contains key,obj1,obj2
         if (collision.key=="BORDER"){
             state.entities[collision.me].dir = 0;
         }
+        if (collision.key == "GOAL" && lab.isPlr(lvl,state,collision.me) && !state.end){
+            state.entities[collision.me].dir = 0;
+            state.end = "WIN";
+            anims[step] = anims[step] || {changes:{}};
+            anims[step].changes[collision.me] = "win";
+        }
+        
         // TODO - add support for non-border collisions
         return {
             state: state,
@@ -220,6 +260,7 @@ window.lab = (function(lab){
         }
         do {
             sthmoving = false;
+            step += before ? 0 : 1;
             for(e in lvl.entities){
                 var entitydir = movestate.entities[e].dir;
                 if (entitydir){
@@ -232,7 +273,7 @@ window.lab = (function(lab){
                     }
                     var collisions = lab.findCollisions(lvl,movestate,e,before);
                     for(var c in collisions){
-                        var collisionresult = lab.performCollision(lvl,movestate,anims,collisions[c]);
+                        var collisionresult = lab.performCollision(lvl,movestate,anims,collisions[c],step);
                         movestate = collisionresult.state;
                         anims = collisionresult.anims;
                     }
@@ -241,7 +282,9 @@ window.lab = (function(lab){
                         movestate.entities[e].dir = 0;
                         anims[step] = anims[step] || {changes:{}};
                         anims[step].changes[e] = "dead";
-                        movestate.end = "GAMEOVER"; // TODO - only do this if it was plr that died
+                        if (lab.isPlr(lvl, movestate, e)) {
+                            movestate.end = "GAMEOVER";
+                        }
                     }
                     if (movestate.entities[e].dir){ // we're still on the move! :)
                         sthmoving = true;
@@ -249,7 +292,6 @@ window.lab = (function(lab){
                     // TODO: update movestate & anims for new/changed moves
                 }
             }
-            step += before ? 0 : 1;
             before = !before;
         }
         while(sthmoving);

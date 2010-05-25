@@ -19,10 +19,6 @@ var lvl = {
 		}
 	},
 	collisions: {
-		"plr-goal":{
-			"effectsets": ["reachgoal"],
-			"kind": "on"
-		},
 		"plr-w": {
 			"effectset": ["hitwall"],
 			"kind": "nextto"
@@ -33,10 +29,6 @@ var lvl = {
 		}
 	},
 	effectsets: {
-		"reachgoal": {
-			"gameeffects": ["reachgoal"],
-			"obj1effects": ["hitwall"]
-		},
 		"hitwall": {
 			"obj1effects": ["hitwall"]
 		}
