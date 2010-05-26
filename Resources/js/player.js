@@ -1,5 +1,7 @@
 window.lab = (function(lab){
 
+    var squaresize = 30;
+
     /**
      * Builds the level objects in the given container
      * @param {Object} lvl
@@ -9,8 +11,8 @@ window.lab = (function(lab){
         var maze = $("#"+containerid)
                    .addClass("board")
                    .css({
-                       height: lvl.rows*30,
-                       width: lvl.cols*30
+                       height: lvl.rows*squaresize,
+                       width: lvl.cols*squaresize
                    });
         for(var b in lvl.borders){
             var bordername = lvl.borders[b],
@@ -18,8 +20,8 @@ window.lab = (function(lab){
                          .addClass("border")
                          .addClass(bordername.charAt(3)=="s" ? "hborder" : "vborder")
                          .css({
-                             top: (Number(bordername.charAt(2))-1)*30,
-                             left: (Number(bordername.charAt(0))-1)*30
+                             top: (Number(bordername.charAt(2))-1)*squaresize,
+                             left: (Number(bordername.charAt(0))-1)*squaresize
                          });
             maze.append(border);
         }
@@ -28,8 +30,8 @@ window.lab = (function(lab){
                          .addClass("entity")
                          .attr("id","entity"+e)
                          .css({
-                             top: (lvl.entities[e].y-1)*30,
-                             left: (lvl.entities[e].x-1)*30
+                             top: (lvl.entities[e].y-1)*squaresize,
+                             left: (lvl.entities[e].x-1)*squaresize
                          });
             maze.append(entity);
         }
@@ -37,8 +39,8 @@ window.lab = (function(lab){
                 square = $("<div>")
                          .addClass("square")
                          .css({
-                             top: (Number(s.charAt(2))-1)*30,
-                             left: (Number(s.charAt(0))-1)*30
+                             top: (Number(s.charAt(2))-1)*squaresize,
+                             left: (Number(s.charAt(0))-1)*squaresize
                          });
             maze.append(square);
         }
@@ -73,20 +75,21 @@ window.lab = (function(lab){
     };
     
     lab.animateMoveStep = function(){
+        var steptime = 200;
         if (currentanims[currentstep]){
             var a = currentanims[currentstep];
             if (a.slides) {
                 for (var e in a.slides) {
                     $("#entity" + e).animate({
-                        top: (a.slides[e].y - 1) * 30,
-                        left: (a.slides[e].x - 1) * 30
-                    }, a.slides[e].sqrs * 500);
+                        top: (a.slides[e].y - 1) * squaresize,
+                        left: (a.slides[e].x - 1) * squaresize
+                    }, a.slides[e].sqrs * steptime);
                 }
             }
         }
         if (currentstep<=currentanims.steps){
             currentstep++;
-            setTimeout("lab.animateMoveStep()",500);
+            setTimeout(lab.animateMoveStep,steptime);
             return;
         }
         if (isNaN(currentanims.target)){

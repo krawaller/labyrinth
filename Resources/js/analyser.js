@@ -223,11 +223,11 @@ window.lab = (function(lab){
     };
     
     /**
-     * Tests if an entity hasn't gone overe the edge
+     * Tests if an entity has gone overe the edge
      * @param {Object} lvl
      * @param {Object} state
      * @param {string} entitykey
-     * @bool if entity is within level limits or not
+     * @bool if entity is outside level limits or not
      */
     lab.testIfOutOfBounds = function(lvl,state,entitykey){
         var x = state.entities[entitykey].x,
