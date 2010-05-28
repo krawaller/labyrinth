@@ -369,8 +369,14 @@ window.lab = (function(lab){
                     analysis = stateresult.analysis;
                     targetkey = stateresult.key;
                 }
-                analysis.states[targetkey].steps = Math.min(analysis.states[targetkey].steps,step);
-                analysis.states[targetkey].from.push({k:key,d:d,s:step});
+                if (targetkey != key) { // reached new state (didn't bang wall without changing anything)
+                    analysis.states[targetkey].steps = Math.min(analysis.states[targetkey].steps,step);
+                    analysis.states[targetkey].from.push({
+                        k: key,
+                        d: d,
+                        s: step
+                    });
+                }
             }
             moveresult.anims.target = end ? end : targetkey;
             analysis.states[key].moves[d] = moveresult.anims;
