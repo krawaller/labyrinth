@@ -28,16 +28,17 @@ window.lab = (function(lab){
                        height: lvl.rows*squaresize,
                        width: lvl.cols*squaresize
                    });
+        var coords;
         for(var b in lvl.borders){
-            var bordername = lvl.borders[b],
-                coords = lab.getCoords(bordername,true),
-                border = $("<div>")
-                         .addClass("border")
-                         .addClass(bordername.charAt(0)=="s" ? "hborder" : "vborder")
-                         .css({
-                             top: (coords.y-1)*squaresize, 
-                             left: (coords.x-1)*squaresize
-                         });
+            var bordername = lvl.borders[b],border;
+            coords = lab.getCoords(bordername,true);
+            border = $("<div>")
+                     .addClass("border")
+                     .addClass(bordername.charAt(0)=="s" ? "hborder" : "vborder")
+                     .css({
+                         top: (coords.y-1)*squaresize, 
+                         left: (coords.x-1)*squaresize
+                     });
             maze.append(border);
         }
         for(var e in lvl.entities){
