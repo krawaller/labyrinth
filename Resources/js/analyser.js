@@ -440,6 +440,34 @@ window.lab = (function(lab){
     };
     
     /**
+     * 
+     * @param {Object} analysis
+     * @param {Number} key
+     */
+    lab.updateStepCount = function(analysis,key,step){
+        analysis.states[key].steps = step;
+        step++;
+        for(var d in analysis.states[key].moves){
+            var tkey = analysis.states[key].moves[d].target;
+            if (!isNaN(tkey) && analysis.states[tkey].steps > step){
+                analysis = lab.updateStepCount(analysis,tkey,step);
+            }
+            if (tkey == "PERFECTWIN"){
+                if (step<analysis.bestwin.s){
+                    analysis.bestwin = {
+                        k: [key],
+                        s: step
+                    };
+                }
+                if (step==analysis.bestwin.s && analysis.bestwin.k.indexOf(key)==-1){
+                    analysis.bestwin.k.push(key);
+                }
+            }
+        }
+        return analysis;
+    };
+    
+    /**
      * updates an analysis for the given state. will also recursively analyse new states reached.
      * @param {Object} lvl
      * @param {Object} state
@@ -469,11 +497,13 @@ window.lab = (function(lab){
                     targetkey = stateresult.key;
                 }
                 if (targetkey != key) { // reached new state (didn't bang wall without changing anything)
-                    analysis.states[targetkey].steps = Math.min(analysis.states[targetkey].steps,step);
+                    if (step<analysis.states[targetkey].steps){
+                        analysis = lab.updateStepCount(analysis,targetkey,step);
+//                        analysis.states[targetkey].steps = step; // TODO - change this to recursive function that updates steps
+                    }
                     analysis.states[targetkey].from.push({
                         k: key,
-                        d: d,
-                        s: step
+                        d: d
                     });
                 }
             }

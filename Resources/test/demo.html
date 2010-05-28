@@ -84,6 +84,78 @@ var lvl = {
         }
     }
 };
+var lvl2 = {
+	title: "testlevel",
+	rows: 6,
+	cols: 8,
+	borders: ["s6_1","e1_2","e1_4","e1_5","s2_5","e5_5","e7_4","s7_5"],
+    squares: {
+		"7_2": "goal",
+        "6_2": "gate",
+        "5_1": "wall",
+        "5_4": "sand",
+        "2_2": "money",
+        "2_3": "ice2",
+        "3_5": "bigmoney",
+        "6_5": "key"
+	},
+	entities: [{
+		type: "plr",
+		x: 2,
+		y: 4
+	}],
+	types: {
+		"plr": {
+			move: "grav"
+		}
+	},
+    squarecollisions: {
+        "plr-wall":{
+            stop: true
+        },
+        "plr-sand":{
+            stop: true,
+            on: true
+        },
+        "plr-money":{
+            on: true,
+            setwalltype: "none"
+        },
+        "plr-bigmoney":{
+            on: true,
+            stop: true,
+            setwalltype: "none"
+        },
+        "plr-ice2":{
+            stop: true,
+            setwalltype: "ice1"
+        },
+        "plr-ice1":{
+            stop: true,
+            setwalltype: "none"
+        },
+        "plr-key":{
+            setwalltype: "none",
+            setflag: "haskey",
+            on: true
+        },
+        "plr-gate":{
+            cond: {
+                conds: {
+                    "hasflag": "haskey"
+                },
+                iftrue: {
+                    on: true,
+                    stop: true,
+                    setwalltype: "none"
+                },
+                iffalse: {
+                    stop:true
+                }
+            }
+        }
+    }
+};
 lab.playLevel(lvl,"main");
 </script>
 </body>

@@ -126,7 +126,7 @@ window.lab = (function(lab){
                     alert("Woo, you reached all objectives within the optimal amount of steps! You roxxors!");
                 }
                 else {
-                    alert("So you did all you set out to, but took WAY too long doing it! Loser!");
+                    alert("So you did all you set out to, but took WAY too long doing it! Loser! Used "+nbrofmoves+" moves, but need only "+analysis.bestwin.s+"!");
                 }                
             }
             else if (currentanims.target == "WIN") {
