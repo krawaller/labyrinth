@@ -427,7 +427,7 @@ window.lab = (function(lab){
                         s: step
                     };
                 }
-                if (step==analysis.bestwin.s){
+                if (step==analysis.bestwin.s && !lab.inArray(key,analysis.bestwin.k)){
                     analysis.bestwin.k.push(key);
                 }
             }
