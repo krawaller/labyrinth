@@ -78,7 +78,7 @@ window.lab = (function(lab){
     
     lab.animateMoveStep = function(){
         var steptime = 200;
-        if (currentanims[currentstep]){
+        if (currentanims && currentanims[currentstep]){
             var a = currentanims[currentstep];
             if (a.slides) {
                 for (var e in a.slides) {

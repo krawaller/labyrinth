@@ -19,7 +19,9 @@ var lvl = {
 		"7_2": "goal",
         "5_1": "wall",
         "5_4": "sand",
-        "2_2": "money"
+        "2_2": "money",
+        "2_3": "ice2",
+        "3_5": "bigmoney"
 	},
 	entities: [{
 		type: "plr",
@@ -41,6 +43,19 @@ var lvl = {
         },
         "plr-money":{
             kind: "on",
+            setwalltype: "none"
+        },
+        "plr-bigmoney":{
+            kind: "on",
+            stop: true,
+            setwalltype: "none"
+        },
+        "plr-ice2":{
+            stop: true,
+            setwalltype: "ice1"
+        },
+        "plr-ice1":{
+            stop: true,
             setwalltype: "none"
         }
     }
