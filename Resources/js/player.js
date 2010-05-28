@@ -3,6 +3,20 @@ window.lab = (function(lab){
     var squaresize = 30;
 
     /**
+     * Parses a string for coordinates
+     * @param {string} str The string to parse
+     * @param {bool} skipfirst Whether or not to skip the first letter
+     * @return {Object} An object with x & y property
+     */
+    lab.getCoords = function(str,skipfirst){
+        var divpos = str.indexOf("_"),start = skipfirst ? 1 : 0;
+        return {
+            x: Number(str.substr(start,divpos-start)),
+            y: Number(str.substr(divpos+1,666))
+        };
+    };
+
+    /**
      * Builds the level objects in the given container
      * @param {Object} lvl
      * @param {string} containerid
@@ -16,12 +30,13 @@ window.lab = (function(lab){
                    });
         for(var b in lvl.borders){
             var bordername = lvl.borders[b],
+                coords = lab.getCoords(bordername,true),
                 border = $("<div>")
                          .addClass("border")
                          .addClass(bordername.charAt(0)=="s" ? "hborder" : "vborder")
                          .css({
-                             top: (Number(bordername.charAt(3))-1)*squaresize, // TODO: support size > 9
-                             left: (Number(bordername.charAt(1))-1)*squaresize
+                             top: (coords.y-1)*squaresize, 
+                             left: (coords.x-1)*squaresize
                          });
             maze.append(border);
         }
@@ -36,14 +51,15 @@ window.lab = (function(lab){
             maze.append(entity);
         }
         for(var s in lvl.squares){
-                square = $("<div>")
-                         .addClass("square")
-                         .addClass(lab.getSquareType(lvl,0,s))
-                         .attr("id","s"+s)
-                         .css({
-                             top: (Number(s.charAt(2))-1)*squaresize, // TODO: support size > 9
-                             left: (Number(s.charAt(0))-1)*squaresize
-                         });
+            coords = lab.getCoords(s);
+            square = $("<div>")
+                     .addClass("square")
+                     .addClass(lab.getSquareType(lvl,0,s))
+                     .attr("id","s"+s)
+                     .css({
+                         top: (coords.y-1)*squaresize, 
+                         left: (coords.x-1)*squaresize
+                     });
             maze.append(square);
         }
     };

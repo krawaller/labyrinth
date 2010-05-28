@@ -234,6 +234,8 @@ window.lab = (function(lab){
         for(var e in state.entities){
             delete state.entities[e].dir;
             delete state.entities[e].movestarted;
+            delete state.entities[e].pushing;
+            delete state.entities[e].pushedby;
             if (state.entities.type == lvl.entities[e].type){
                 delete state.entities.type; // only need to store type in state if different from starttype
             }
@@ -329,7 +331,7 @@ window.lab = (function(lab){
         do {
             sthmoving = false;
             step += before ? 0 : 1;
-            for(e in lvl.entities){
+            for(e in lvl.entities){ // TODO - sort this shit right
                 var entitydir = movestate.entities[e].dir;
                 if (entitydir){
                     if (!before){
