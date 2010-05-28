@@ -11,21 +11,7 @@ window.lab = (function(lab){
         return JSON.stringify(state);
     };
     
-    /**
-     * Checks an array for a value
-     * @param {Object} needle
-     * @param {Array} haystack
-     * @returns {bool} whether or not needle was found
-     */
-    lab.inArray = function(needle,haystack){
-        for(var i in haystack){
-            if (haystack[i]==needle){
-                return true;
-            }
-        }
-        return false;
-    };
-    
+  
     /**
      * returns a deep-copied clone
      * @param {Object} obj
@@ -100,7 +86,7 @@ window.lab = (function(lab){
             othertype;
         if (before){ // borders, and next square with nextto prop
             // find borders
-            if (lab.inArray(lab.calculateBorderName(x, y, dir), lvl.borders)) { // hit a border!
+            if (lvl.borders.indexOf(lab.calculateBorderName(x, y, dir))!=-1) { // hit a border!
                 collisions.push({
                     key: "BORDER"
                 });
@@ -179,7 +165,7 @@ window.lab = (function(lab){
             }
             if (c.setflag){
                 state.flags = state.flags || [];
-                if (!lab.inArray(c.setflag,state.flags)){
+                if (state.flags.indexOf(c.setflag)==-1){
                     state.flags.push(c.setflag);
                     state.flags.sort();
                 }
@@ -203,7 +189,7 @@ window.lab = (function(lab){
     lab.resolveConditions = function(lvl,state,conds,entitykey,otherkey){
         for(var c in conds){
             if (c == "hasflag"){
-                if (!state.flags || !lab.inArray(conds[c],state.flags)){
+                if (!state.flags || state.flags.indexOf(conds[c])==-1){
                     return false;
                 }
             }
@@ -406,7 +392,7 @@ window.lab = (function(lab){
     lab.findObjectives = function(lvl){
         var ret = {squares:{}};
         for(var s in lvl.squares){
-            if (lab.inArray(lvl.squares[s],["money","bigmoney"])){
+            if (["money","bigmoney"].indexOf(lvl.squares[s])!=-1){
                 ret.squares[s] = "none";
             }
         }
@@ -497,7 +483,7 @@ window.lab = (function(lab){
                         s: step
                     };
                 }
-                if (step==analysis.bestwin.s && !lab.inArray(key,analysis.bestwin.k)){
+                if (step==analysis.bestwin.s && analysis.bestwin.k.indexOf(key)==-1){
                     analysis.bestwin.k.push(key);
                 }
             }
