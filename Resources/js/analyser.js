@@ -48,9 +48,9 @@ window.lab = (function(lab){
      */
     lab.calculateBorderName = function(x,y,dir){
         if (dir==1 || dir==4){
-            return (x+fac[dir][0])+"_"+(y+fac[dir][1])+(dir==1?"s":"e");
+            return (dir==1?"s":"e")+(x+fac[dir][0])+"_"+(y+fac[dir][1]);
         }
-        return x+"_"+y+(dir==2?"e":"s");
+        return (dir==1?"s":"e")+x+"_"+y;
     };
     
     /**

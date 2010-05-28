@@ -18,10 +18,10 @@ window.lab = (function(lab){
             var bordername = lvl.borders[b],
                 border = $("<div>")
                          .addClass("border")
-                         .addClass(bordername.charAt(3)=="s" ? "hborder" : "vborder")
+                         .addClass(bordername.charAt(0)=="s" ? "hborder" : "vborder")
                          .css({
-                             top: (Number(bordername.charAt(2))-1)*squaresize, // TODO: support size > 9
-                             left: (Number(bordername.charAt(0))-1)*squaresize
+                             top: (Number(bordername.charAt(3))-1)*squaresize, // TODO: support size > 9
+                             left: (Number(bordername.charAt(1))-1)*squaresize
                          });
             maze.append(border);
         }
@@ -39,7 +39,7 @@ window.lab = (function(lab){
                 square = $("<div>")
                          .addClass("square")
                          .addClass(lab.getSquareType(lvl,0,s))
-                         .attr("id",s)
+                         .attr("id","s"+s)
                          .css({
                              top: (Number(s.charAt(2))-1)*squaresize, // TODO: support size > 9
                              left: (Number(s.charAt(0))-1)*squaresize
@@ -91,7 +91,7 @@ window.lab = (function(lab){
             }
             if (a.squares){
                 for (var s in a.squares){
-                    $("#"+s).attr("class","square "+a.squares[s]);
+                    $("#s"+s).attr("class","square "+a.squares[s]);
                 }
             }
         }
