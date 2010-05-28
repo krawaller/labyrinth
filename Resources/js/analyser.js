@@ -48,9 +48,9 @@ window.lab = (function(lab){
      */
     lab.calculateBorderName = function(x,y,dir){
         if (dir==1 || dir==4){
-            return (x+fac[dir][0])+","+(y+fac[dir][1])+(dir==1?"s":"e");
+            return (x+fac[dir][0])+"_"+(y+fac[dir][1])+(dir==1?"s":"e");
         }
-        return x+","+y+(dir==2?"e":"s");
+        return x+"_"+y+(dir==2?"e":"s");
     };
     
     /**
@@ -89,13 +89,13 @@ window.lab = (function(lab){
             }
             else {
                 // find squares
-                otherkey = (x + fac[dir][0]) + "," + (y + fac[dir][1]);
+                otherkey = (x + fac[dir][0]) + "_" + (y + fac[dir][1]);
                 othertype = lab.getSquareType(lvl, state, otherkey);
                 if (othertype) { // hit a square!
-                    collision = lvl.collisions[entitykey + "-" + othertype];
-                    if (collision && lvl.collisions[collision].kind != "on") {
+                    collision = lvl.squarecollisions[type + "-" + othertype];
+                    if (collision && collision.kind != "on") {
                         collisions.push({
-                            key: collision,
+                            key: type + "-" + othertype,
                             'with': otherkey
                         });
                     }
@@ -104,7 +104,7 @@ window.lab = (function(lab){
             }
         }
         else { // current square and entities on same square
-            otherkey = x+","+y;
+            otherkey = x+"_"+y;
             othertype = lab.getSquareType(lvl,state,otherkey);
             if (othertype == "goal" && lab.isPlr(lvl,state,entitykey)) {
                 collisions.push({
@@ -112,10 +112,10 @@ window.lab = (function(lab){
                 });
             }
             else {
-                collision = lvl.collisions[entitykey + "-" + othertype];
-                if (collision && lvl.collisions[collision].kind == "on") {
+                collision = lvl.squarecollisions[type + "-" + othertype];
+                if (collision && collision.kind == "on") {
                     collisions.push({
-                        key: collision,
+                        key: type + "-" + othertype,
                         'with': otherkey
                     });
                 }
@@ -147,7 +147,20 @@ window.lab = (function(lab){
             anims[step] = anims[step] || {changes:{}};
             anims[step].changes[collision.me] = "win";
         }
-        
+        var c = lvl.squarecollisions[collision.key];
+        if (c) {
+            if (c.stop) {
+                state.entities[collision.me].dir = 0;
+            }
+            if (c.setwalltype){
+                state.squares = state.squares || {};
+                state.squares[collision["with"]] = c.setwalltype;
+                anims[step] = anims[step] || {};
+                anims[step].squares = anims[step].squares || {};
+                anims[step].squares[collision["with"]] = c.setwalltype;
+console.log(collision["with"],lab.getSquareType(lvl,state,collision["with"]));
+            }
+        }
         // TODO - add support for non-border collisions
         return {
             state: state,
@@ -197,7 +210,7 @@ window.lab = (function(lab){
      */
     lab.getSquareType = function(lvl, state, squarekey){
         var type;
-        type = lvl.squares[squarekey];
+        type = state && state.squares && state.squares[squarekey] ? state.squares[squarekey] : lvl.squares[squarekey];
         // TODO - add support for conditionals
         return type;
     };
