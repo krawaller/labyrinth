@@ -158,7 +158,6 @@ window.lab = (function(lab){
                 anims[step] = anims[step] || {};
                 anims[step].squares = anims[step].squares || {};
                 anims[step].squares[collision["with"]] = c.setwalltype;
-console.log(collision["with"],lab.getSquareType(lvl,state,collision["with"]));
             }
         }
         // TODO - add support for non-border collisions
@@ -354,7 +353,8 @@ console.log(collision["with"],lab.getSquareType(lvl,state,collision["with"]));
         analysis.states[key] = {
             state: state,
             moves: {},
-            steps: step++
+            steps: step++,
+            from: []
         };
         analysis.statekeys[serialisedstate] = key;
         for (var d = 1; d <= 4; d++) {
@@ -370,6 +370,7 @@ console.log(collision["with"],lab.getSquareType(lvl,state,collision["with"]));
                     targetkey = stateresult.key;
                 }
                 analysis.states[targetkey].steps = Math.min(analysis.states[targetkey].steps,step);
+                analysis.states[targetkey].from.push({k:key,d:d,s:step});
             }
             moveresult.anims.target = end ? end : targetkey;
             analysis.states[key].moves[d] = moveresult.anims;
