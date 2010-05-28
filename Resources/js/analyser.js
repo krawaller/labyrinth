@@ -50,7 +50,7 @@ window.lab = (function(lab){
         if (dir==1 || dir==4){
             return (dir==1?"s":"e")+(x+fac[dir][0])+"_"+(y+fac[dir][1]);
         }
-        return (dir==1?"s":"e")+x+"_"+y;
+        return (dir==3?"s":"e")+x+"_"+y;
     };
     
     /**
