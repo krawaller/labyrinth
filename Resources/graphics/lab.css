@@ -25,6 +25,7 @@
 .goal { background-color: red; }
 .wall { background-color: white; }
 .sand { background-color: yellow; }
+.gate { background-color: green; }
 .ice2 { background-color: #0000FF; }
 .ice1 { background-color: #000099; }
 .none { display: none; }
@@ -48,7 +49,16 @@
     -webkit-border-radius: 20px; /* Saf3+, Chrome */
     border-radius: 20px; /* Opera 10.5, IE 9 */
 }
-
+.key {
+    background-color: green; 
+    margin-left: 10px;
+    margin-top: 10px;
+    width: 10px;
+    height: 10px;
+     -moz-border-radius: 20px; /* FF1+ */
+    -webkit-border-radius: 20px; /* Saf3+, Chrome */
+    border-radius: 20px; /* Opera 10.5, IE 9 */
+}
 .entity {
     background-color: white;
     width: 20px;

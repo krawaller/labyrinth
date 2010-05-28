@@ -40,6 +40,24 @@ window.lab = (function(lab){
     };
     
     /**
+     * returns augmented object
+     * @param {Object} o1
+     * @param {Object} o2
+     * @returns {Object} 
+     */
+    lab.augmentObject = function(o1,o2){
+        o1 = lab.cloneObj(o1);
+        if (!o2){
+            return o1;
+        }
+        o2 = lab.cloneObj(o2);
+        for(var p in o2){
+            o1[p] = o2[p];
+        }
+        return o1;
+    };
+    
+    /**
      * Returns the key for the border in the given direction from the given square
      * @param {int} x
      * @param {int} y
@@ -92,8 +110,8 @@ window.lab = (function(lab){
                 otherkey = (x + fac[dir][0]) + "_" + (y + fac[dir][1]);
                 othertype = lab.getSquareType(lvl, state, otherkey);
                 if (othertype) { // hit a square!
-                    collision = lvl.squarecollisions[type + "-" + othertype];
-                    if (collision && collision.kind != "on") {
+                    collision = lab.resolveObject(lvl,state,lvl.squarecollisions[type + "-" + othertype],entitykey,otherkey);
+                    if (collision && !collision.on) {
                         collisions.push({
                             key: type + "-" + othertype,
                             'with': otherkey
@@ -110,10 +128,10 @@ window.lab = (function(lab){
                 collisions.push({
                     key: "GOAL"
                 });
-            }
+            } 
             else {
-                collision = lvl.squarecollisions[type + "-" + othertype];
-                if (collision && collision.kind == "on") {
+                collision = lab.resolveObject(lvl,state,lvl.squarecollisions[type + "-" + othertype],entitykey,otherkey);
+                if (collision && collision.on) {
                     collisions.push({
                         key: type + "-" + othertype,
                         'with': otherkey
@@ -147,7 +165,7 @@ window.lab = (function(lab){
             anims[step] = anims[step] || {changes:{}};
             anims[step].changes[collision.me] = "win";
         }
-        var c = lvl.squarecollisions[collision.key];
+        var c = lab.resolveObject(lvl,state,lvl.squarecollisions[collision.key],collision.me,collision["with"]);
         if (c) {
             if (c.stop) {
                 state.entities[collision.me].dir = 0;
@@ -159,12 +177,64 @@ window.lab = (function(lab){
                 anims[step].squares = anims[step].squares || {};
                 anims[step].squares[collision["with"]] = c.setwalltype;
             }
+            if (c.setflag){
+                state.flags = state.flags || [];
+                if (!lab.inArray(c.setflag,state.flags)){
+                    state.flags.push(c.setflag);
+                    state.flags.sort();
+                }
+            }
         }
         // TODO - add support for non-border collisions
         return {
             state: state,
             anims: anims
         };
+    };
+    
+    /**
+     * tests a set of conditions
+     * @param {Object} lvl
+     * @param {Object} state
+     * @param {Object} conds
+     * @param {Object} entitykey
+     * @param {Object} otherkey
+     */
+    lab.resolveConditions = function(lvl,state,conds,entitykey,otherkey){
+        for(var c in conds){
+            if (c == "hasflag"){
+                if (!state.flags || !lab.inArray(conds[c],state.flags)){
+                    return false;
+                }
+            }
+        }
+        return true;
+    };
+    
+    /**
+     * Fixes eventual conditions and returns
+     * @param {Object} lvl
+     * @param {Object} state
+     * @param {Object} obj
+     * @param {Object} entitykey
+     * @param {Object} otherkey
+     * @returns {Object} object weee
+     */
+    lab.resolveObject = function(lvl,state,obj,entitykey,otherkey){
+        var ret = {};
+        if (!obj){
+            return;
+        }
+        for(var c in obj){
+            if (c == "cond") {
+                var o2 = lab.resolveConditions(lvl, state, obj.cond.conds, entitykey, otherkey) ? obj.cond.iftrue : obj.cond.iffalse;
+                ret = lab.augmentObject(ret, o2);
+            }
+            else {
+                ret[c] = obj[c];
+            }
+        }
+        return ret;
     };
     
     /**
