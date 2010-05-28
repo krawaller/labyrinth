@@ -499,7 +499,6 @@ window.lab = (function(lab){
                 if (targetkey != key) { // reached new state (didn't bang wall without changing anything)
                     if (step<analysis.states[targetkey].steps){
                         analysis = lab.updateStepCount(analysis,targetkey,step);
-//                        analysis.states[targetkey].steps = step; // TODO - change this to recursive function that updates steps
                     }
                     analysis.states[targetkey].from.push({
                         k: key,
