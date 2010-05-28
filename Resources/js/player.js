@@ -57,8 +57,11 @@ window.lab = (function(lab){
     };
 
     lab.moveInDir = function(dir){
-        lab.stopReceiving();
         currentanims = analysis.states[currentstate].moves[dir];
+        if (!currentanims){
+            return;
+        }
+        lab.stopReceiving();
         currentstep = 0;
         lab.animateMoveStep();
     };
@@ -79,7 +82,7 @@ window.lab = (function(lab){
     
     lab.animateMoveStep = function(){
         var steptime = 200;
-        if (currentanims && currentanims[currentstep]){
+        if (currentanims[currentstep]){
             var a = currentanims[currentstep];
             if (a.slides) {
                 for (var e in a.slides) {
