@@ -48,7 +48,7 @@ window.lab = (function(lab){
         }
     };
 
-    var analysis, currentstate = 1, animating, currentanims, currentstep;
+    var analysis, currentstate = 1, animating, currentanims, currentstep, nbrofmoves = 0;
 
     lab.playLevel = function(lvl){
         lab.buildLevel(lvl,"main");
@@ -74,6 +74,7 @@ window.lab = (function(lab){
         evt = evt || window.event;
         var key = evt.keyCode || evt.which;
         lab.moveInDir({38:1,39:2,40:3,37:4}[key]);
+        nbrofmoves++;
     };
     
     lab.animateMoveStep = function(){
@@ -99,8 +100,21 @@ window.lab = (function(lab){
             setTimeout(lab.animateMoveStep,steptime);
             return;
         }
-        if (isNaN(currentanims.target)){
-            alert(currentanims.target);
+        if (isNaN(currentanims.target)){ // Game ended
+            if (currentanims.target == "PERFECTWIN"){
+                if (nbrofmoves==analysis.bestwin.s){
+                    alert("Woo, you reached all objectives within the optimal amount of steps! You roxxors!");
+                }
+                else {
+                    alert("So you did all you set out to, but took WAY too long doing it! Loser!");
+                }                
+            }
+            else if (currentanims.target == "WIN") {
+                alert("You reached the goal! Too bad you didn't fulfil all objectives, dumbass!");
+            }
+            else { // died
+                alert("Game over!");
+            }
         }
         else {
             currentstate = currentanims.target;

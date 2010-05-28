@@ -315,12 +315,53 @@ window.lab = (function(lab){
     };
     
     /**
+     * Tests if a state fulfills all objectives for a perfect win
+     * @param {Object} state
+     * @param {Object} objectives
+     */
+    lab.testStateForObjectives = function(lvl,state,objectives){
+        for(var s in objectives.squares){
+            if (lab.getSquareType(lvl,state,s)!=objectives.squares[s]){
+                return false;
+            }
+        }
+        return true;
+        // TODO: add support for other kind of objectives
+    };
+    
+    /**
+     * Calculates the conditions that need to be set in a state for it to be a perfect win
+     * @param {Object} lvl
+     */
+    lab.findObjectives = function(lvl){
+        var ret = {squares:{}};
+        for(var s in lvl.squares){
+            if (lab.inArray(lvl.squares[s],["money","bigmoney"])){
+                ret.squares[s] = "none";
+            }
+        }
+        return ret;
+        // TODO: add support for other kind of objectives
+    };
+    
+    /**
      * Analyses a level, creating the full state structure with inbetween transitions
      * @param {Object} lvl
      * @returns {Object} analysis
      */
     lab.analyseLevel = function(lvl){
-        return lab.analyse(lvl, lab.buildStartState(lvl), {statekeys: {nbrofstates:0},states:{}}, 0).analysis;
+        var analysis = {
+            statekeys: {
+                nbrofstates: 0
+            },
+            states: {},
+            objectives: lab.findObjectives(lvl),
+            bestwin: {
+                f: [],
+                s: 666
+            }
+        };
+        return lab.analyse(lvl, lab.buildStartState(lvl), analysis, 0).analysis;
     };
     
     /**
@@ -376,6 +417,18 @@ window.lab = (function(lab){
                         d: d,
                         s: step
                     });
+                }
+            }
+            if (end == "WIN" && lab.testStateForObjectives(lvl,moveresult.state,analysis.objectives)){
+                end = "PERFECTWIN";
+                if (step<analysis.bestwin.s){
+                    analysis.bestwin = {
+                        k: [key],
+                        s: step
+                    };
+                }
+                if (step==analysis.bestwin.s){
+                    analysis.bestwin.k.push(key);
                 }
             }
             moveresult.anims.target = end ? end : targetkey;
