@@ -8,7 +8,7 @@ window.lab = (function(lab){
      * @returns {string} the serialised object
      */
     lab.serialiseState = function(state) {
-        return JSON.stringify(state);
+        return JSON.stringify(lab.cloneObj(state));
     };
     
   
@@ -18,9 +18,13 @@ window.lab = (function(lab){
      * @returns {Object} clone
      */
     lab.cloneObj = function(obj){
-        var clone = new obj.constructor();
-        for(var p in obj){
-            clone[p] = typeof obj[p] === "object" ? lab.cloneObj(obj[p]) : obj[p];
+        var clone = new obj.constructor(), props = [], p;
+        for(p in obj){
+            props.push([p]);
+        }
+        props.sort();
+        for(p=0;p<props.length;p++){
+            clone[props[p]] = typeof obj[props[p]] === "object" ? lab.cloneObj(obj[props[p]]) : obj[props[p]];
         }
         return clone;
     };
