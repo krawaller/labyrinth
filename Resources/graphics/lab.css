@@ -28,6 +28,7 @@
 .gate { background-color: green; }
 .ice2 { background-color: #0000FF; }
 .ice1 { background-color: #000099; }
+.tele, .tele2 { border: 1px solid blue; }
 .none { display: none; }
 .money { 
     background-color: yellow; 

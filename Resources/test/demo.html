@@ -97,7 +97,9 @@ var lvl2 = {
         "2_2": "money",
         "2_3": "ice2",
         "3_5": "bigmoney",
-        "6_5": "key"
+        "6_5": "key",
+        "4_2": "tele",
+        "3_4": "tele2"
 	},
 	entities: [{
 		type: "plr",
@@ -110,6 +112,14 @@ var lvl2 = {
 		}
 	},
     squarecollisions: {
+        "plr-tele":{
+            tele: {x:3,y:4},
+            on: true
+        },
+        "plr-tele2":{
+            tele: {x:4,y:2},
+            on: true
+        },
         "plr-wall":{
             stop: true
         },
@@ -156,7 +166,7 @@ var lvl2 = {
         }
     }
 };
-lab.playLevel(lvl,"main");
+lab.playLevel(lvl2,"main");
 </script>
 </body>
 </html>

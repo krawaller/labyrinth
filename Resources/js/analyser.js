@@ -170,6 +170,27 @@ window.lab = (function(lab){
                     state.flags.sort();
                 }
             }
+            if (c.tele){
+                anims[state.entities[collision.me].movestarted].slides[collision.me] = {
+                    x: state.entities[collision.me].x,
+                    y: state.entities[collision.me].y,
+                    dir: state.entities[collision.me].dir,
+                    sqrs: step - state.entities[collision.me].movestarted
+                };
+                state.entities[collision.me].x = c.tele.x;
+                state.entities[collision.me].y = c.tele.y;
+                anims[step] = anims[step] || {};
+                anims[step].slides = anims[step].slides || {};
+                anims[step].teles = anims[step].teles || {};
+                anims[step].teles[collision.me] = lab.cloneObj(c.tele);
+                state.entities[collision.me].movestarted = step;
+                anims[step].slides[collision.me] = {
+                    x: c.tele.x,
+                    y: c.tele.y,
+                    dir: state.entities[collision.me].dir,
+                    sqrs: 0
+                };
+            }
         }
         // TODO - add support for non-border collisions
         return {
@@ -236,8 +257,8 @@ window.lab = (function(lab){
             delete state.entities[e].movestarted;
             delete state.entities[e].pushing;
             delete state.entities[e].pushedby;
-            if (state.entities.type == lvl.entities[e].type){
-                delete state.entities.type; // only need to store type in state if different from starttype
+            if (state.entities[e].type == lvl.entities[e].type){
+                delete state.entities[e].type; // only need to store type in state if different from starttype
             }
         }
         return state;

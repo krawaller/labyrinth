@@ -98,11 +98,19 @@ window.lab = (function(lab){
     };
     
     lab.animateMoveStep = function(){
-        var steptime = 200;
+        var steptime = 200, e;
         if (currentanims[currentstep]){
             var a = currentanims[currentstep];
+            if (a.teles){
+                for (e in a.teles){
+                    $("#entity" + e).stop().css({
+                        top: (a.teles[e].y - 1) * squaresize,
+                        left: (a.teles[e].x - 1) * squaresize
+                    });
+                }
+            }
             if (a.slides) {
-                for (var e in a.slides) {
+                for (e in a.slides) {
                     $("#entity" + e).animate({
                         top: (a.slides[e].y - 1) * squaresize,
                         left: (a.slides[e].x - 1) * squaresize
