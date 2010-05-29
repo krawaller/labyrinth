@@ -13,7 +13,7 @@ window.lab = (function(lab){
     
   
     /**
-     * returns a deep-copied clone
+     * returns a deep-copied clone with props in sorted order
      * @param {Object} obj
      * @returns {Object} clone
      */
@@ -175,12 +175,6 @@ window.lab = (function(lab){
                 }
             }
             if (c.tele){
-                anims[state.entities[collision.me].movestarted].slides[collision.me] = {
-                    x: state.entities[collision.me].x,
-                    y: state.entities[collision.me].y,
-                    dir: state.entities[collision.me].dir,
-                    sqrs: step - state.entities[collision.me].movestarted
-                };
                 state.entities[collision.me].x = c.tele.x;
                 state.entities[collision.me].y = c.tele.y;
                 anims[step] = anims[step] || {};
