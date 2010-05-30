@@ -150,19 +150,19 @@ var lvl2 = {
             on: true
         },
         "plr-gate":{
-            cond: {
-                conds: {
+            conds: [{
+                'if': {
                     "hasflag": "haskey"
                 },
-                iftrue: {
+                then: {
                     on: true,
                     stop: true,
                     setwalltype: "none"
                 },
-                iffalse: {
+                'else': {
                     stop:true
                 }
-            }
+            }]
         }
     }
 };

@@ -224,9 +224,11 @@ window.lab = (function(lab){
             return;
         }
         for(var c in obj){
-            if (c == "cond") {
-                var o2 = lab.resolveConditions(lvl, state, obj.cond.conds, entitykey, otherkey) ? obj.cond.iftrue : obj.cond.iffalse;
-                ret = lab.augmentObject(ret, o2);
+            if (c == "conds") {
+                for(var f in obj.conds){
+                    var o2 = lab.resolveConditions(lvl, state, obj.conds[f]['if'], entitykey, otherkey) ? obj.conds[f].then : obj.conds[f]['else'];
+                    ret = lab.augmentObject(ret, o2);                    
+                }
             }
             else {
                 ret[c] = obj[c];
