@@ -181,13 +181,6 @@ window.lab = (function(lab){
                 anims[step].slides = anims[step].slides || {};
                 anims[step].teles = anims[step].teles || {};
                 anims[step].teles[collision.me] = lab.cloneObj(c.tele);
-                state.entities[collision.me].movestarted = step;
-                anims[step].slides[collision.me] = {
-                    x: c.tele.x,
-                    y: c.tele.y,
-                    dir: state.entities[collision.me].dir,
-                    sqrs: 0
-                };
             }
         }
         // TODO - add support for non-border collisions
@@ -360,7 +353,7 @@ window.lab = (function(lab){
                         anims[movestate.entities[e].movestarted].slides[e].y = movestate.entities[e].y;
                         anims[movestate.entities[e].movestarted].slides[e].sqrs++;
                     }
-                    var collisions = lab.findCollisions(lvl,movestate,e,before);
+                    var collisions = lab.findCollisions(lvl,movestate,e,before), prev = lab.cloneObj(movestate.entities[e]);
                     for(var c in collisions){
                         var collisionresult = lab.performCollision(lvl,movestate,anims,collisions[c],step);
                         movestate = collisionresult.state;
@@ -377,8 +370,17 @@ window.lab = (function(lab){
                     }
                     if (movestate.entities[e].dir){ // we're still on the move! :)
                         sthmoving = true;
+                        // check if started new slide
+                        if (movestate.entities[e].dir != prev.dir || movestate.entities[e].x != prev.x || movestate.entities[e].y != prev.y){
+                            movestate.entities[e].movestarted = step;
+                            anims[step].slides[e] = {
+                                x: movestate.entities[e].x,
+                                y: movestate.entities[e].y,
+                                dir: movestate.entities[e].dir,
+                                sqrs: 0
+                            };
+                        }
                     }
-                    // TODO: update movestate & anims for new/changed moves
                 }
             }
             before = !before;
