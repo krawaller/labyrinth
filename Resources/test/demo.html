@@ -88,7 +88,7 @@ var lvl2 = {
 	title: "testlevel",
 	rows: 6,
 	cols: 8,
-	borders: ["s6_1","e1_2","e1_4","e1_5","s2_5","e5_5","e7_4","s7_5"],
+	borders: ["s6_1","e1_2","e1_4","e1_5","s2_5","e5_5","s7_5"],
     squares: {
 		"7_2": "goal",
         "6_2": "gate",
@@ -99,7 +99,9 @@ var lvl2 = {
         "3_5": "bigmoney",
         "6_5": "key",
         "4_2": "tele",
-        "3_4": "tele2"
+        "3_4": "tele2",
+        "3_2": "oneway",
+        "7_4": "pipe"
 	},
 	entities: [{
 		type: "plr",
@@ -162,6 +164,27 @@ var lvl2 = {
                 'else': {
                     stop:true
                 }
+            }]
+        },
+        "plr-oneway":{
+            conds: [{
+                'if': {"diris":4},
+                'else': {stop: true}
+            }]
+        },
+        "plr-pipe":{
+            conds: [{
+                'if': {"diris":1},
+                'then': {on:true,"setdir":4}
+            },{
+                'if': {"diris":2},
+                'then': {on:true,"setdir":3}
+            },{
+                'if': {"diris":3},
+                'then': {stop:true}
+            },{
+                'if': {"diris":4},
+                'then': {stop:true}
             }]
         }
     }

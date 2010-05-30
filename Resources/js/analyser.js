@@ -178,9 +178,11 @@ window.lab = (function(lab){
                 state.entities[collision.me].x = c.tele.x;
                 state.entities[collision.me].y = c.tele.y;
                 anims[step] = anims[step] || {};
-                anims[step].slides = anims[step].slides || {};
                 anims[step].teles = anims[step].teles || {};
                 anims[step].teles[collision.me] = lab.cloneObj(c.tele);
+            }
+            if (c.setdir){
+                state.entities[collision.me].dir = c.setdir;
             }
         }
         // TODO - add support for non-border collisions
@@ -202,6 +204,11 @@ window.lab = (function(lab){
         for(var c in conds){
             if (c == "hasflag"){
                 if (!state.flags || state.flags.indexOf(conds[c])==-1){
+                    return false;
+                }
+            }
+            if (c=="diris"){
+                if (conds[c]!=state.entities[entitykey].dir){
                     return false;
                 }
             }
@@ -375,6 +382,8 @@ window.lab = (function(lab){
                         // check if started new slide
                         if (movestate.entities[e].dir != prev.dir || movestate.entities[e].x != prev.x || movestate.entities[e].y != prev.y){
                             movestate.entities[e].movestarted = step;
+                            anims[step] = anims[step] || {};
+                            anims[step].slides = anims[step].slides || {};
                             anims[step].slides[e] = {
                                 x: movestate.entities[e].x,
                                 y: movestate.entities[e].y,

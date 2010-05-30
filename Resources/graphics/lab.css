@@ -29,6 +29,16 @@
 .ice2 { background-color: #0000FF; }
 .ice1 { background-color: #000099; }
 .tele, .tele2 { border: 1px solid blue; }
+.oneway { color: red;  }
+.oneway:before { content: "<<<"; }
+
+.pipe {
+    border-top: 1px solid white;
+    border-right: 1px solid white;
+     -moz-border-radius: 0 20px 0 0; /* FF1+ */
+    -webkit-border-radius: 0 20px 0 0; /* Saf3+, Chrome */
+    border-radius: 0 20px 0 0; /* Opera 10.5, IE 9 */
+}
 .none { display: none; }
 .money { 
     background-color: yellow; 
