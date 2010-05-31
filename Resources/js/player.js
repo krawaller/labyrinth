@@ -92,7 +92,7 @@ window.lab = (function(lab){
                 pageX: tmp.pageX,
                 pageY: tmp.pageY
             }
-        });
+        }, false);
 
         document.addEventListener(lab.events.touchmove, function(e){
             e.preventDefault();
@@ -122,7 +122,7 @@ window.lab = (function(lab){
             if(Math.abs(dx) > 30 || Math.abs(dy) > 30){ 
                 touch = t;
             }
-        });
+        }, false);
     };
 
     lab.moveInDir = function(dir){
