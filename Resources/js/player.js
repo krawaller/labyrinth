@@ -67,10 +67,62 @@ window.lab = (function(lab){
 
     var analysis, currentstate = 1, animating, currentanims, currentstep, nbrofmoves = 0;
 
+    lab.events = {
+        touchstart: 'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown',
+        touchmove: 'ontouchmove' in document.documentElement ? 'touchmove' : 'mousemove',
+        touchend: 'ontouchend' in document.documentElement ? 'touchend' : 'mouseup',
+    };
+
     lab.playLevel = function(lvl){
         lab.buildLevel(lvl,"main");
         analysis = lab.analyseLevel(lvl);
         document.onkeyup = lab.pressedKey;
+        
+        lab.initSwiping();
+    };
+    
+    lab.initSwiping = function(){
+        var touch,
+            tmp,
+            threshold = 30;
+            
+        document.addEventListener(lab.events.touchstart, function(e){
+            e.preventDefault();
+            touch = (tmp = e.changedTouches ? e.changedTouches[0] : e) && {
+                pageX: tmp.pageX,
+                pageY: tmp.pageY
+            }
+        });
+
+        document.addEventListener(lab.events.touchmove, function(e){
+            e.preventDefault();
+            if(!touch){ return; }
+             
+            var t = (tmp = e.changedTouches ? e.changedTouches[0] : e) && {
+                    pageX: tmp.pageX,
+                    pageY: tmp.pageY
+                },
+                dx = t.pageX - touch.pageX,
+                dy = t.pageY - touch.pageY;
+            
+            if(dx > threshold){
+                if (!lab.testIfReceiving()){ return; }
+                lab.moveInDir(2);
+            } else if(dx < -threshold){
+                if (!lab.testIfReceiving()){ return; }
+                lab.moveInDir(4);
+            } else if(dy > threshold){
+                if (!lab.testIfReceiving()){ return; }
+                lab.moveInDir(3);
+            } else if(dy < -threshold){
+                if (!lab.testIfReceiving()){ return; }
+                lab.moveInDir(1);
+            }
+            
+            if(Math.abs(dx) > 30 || Math.abs(dy) > 30){ 
+                touch = t;
+            }
+        });
     };
 
     lab.moveInDir = function(dir){

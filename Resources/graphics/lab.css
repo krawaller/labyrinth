@@ -1,6 +1,10 @@
+body {
+    margin: 0;
+    font-size: 62.5%;
+}
+
 .board {
-    border: solid 1px white;
-    background-color: black;
+    background-color: #000;
     position: relative;
 }
 
@@ -33,10 +37,10 @@
 .oneway:before { content: "<<<"; }
 
 .pipe {
-    border-top: 1px solid white;
-    border-right: 1px solid white;
-     -moz-border-radius: 0 20px 0 0; /* FF1+ */
-    -webkit-border-radius: 0 20px 0 0; /* Saf3+, Chrome */
+    border-top: 1px solid #fff;
+    border-right: 1px solid #fff;
+    -moz-border-radius: 0 20px 0 0; /* FF1+ */
+    -webkit-border-top-right-radius: 20px; /* Saf3+, Chrome */
     border-radius: 0 20px 0 0; /* Opera 10.5, IE 9 */
 }
 .none { display: none; }
@@ -46,9 +50,9 @@
     margin-top: 10px;
     width: 10px;
     height: 10px;
-     -moz-border-radius: 20px; /* FF1+ */
-    -webkit-border-radius: 20px; /* Saf3+, Chrome */
-    border-radius: 20px; /* Opera 10.5, IE 9 */
+     -moz-border-radius: 5px; /* FF1+ */
+    -webkit-border-radius: 5px; /* Saf3+, Chrome */
+    border-radius: 5px; /* Opera 10.5, IE 9 */
 }
 .bigmoney {
     background-color: yellow; 
@@ -56,9 +60,9 @@
     margin-top: 7px;
     width: 16px;
     height: 16px;
-     -moz-border-radius: 20px; /* FF1+ */
-    -webkit-border-radius: 20px; /* Saf3+, Chrome */
-    border-radius: 20px; /* Opera 10.5, IE 9 */
+     -moz-border-radius: 8px; /* FF1+ */
+    -webkit-border-radius: 8px; /* Saf3+, Chrome */
+    border-radius: 8px; /* Opera 10.5, IE 9 */
 }
 .key {
     background-color: green; 
@@ -66,18 +70,19 @@
     margin-top: 10px;
     width: 10px;
     height: 10px;
-     -moz-border-radius: 20px; /* FF1+ */
-    -webkit-border-radius: 20px; /* Saf3+, Chrome */
-    border-radius: 20px; /* Opera 10.5, IE 9 */
+     -moz-border-radius: 5px; /* FF1+ */
+    -webkit-border-radius: 5px; /* Saf3+, Chrome */
+    border-radius: 5px; /* Opera 10.5, IE 9 */
 }
 .entity {
-    background-color: white;
+    background: rgb(35, 170, 255) -webkit-gradient(radial, 40% 40%, 0, 50% 50%, 10, from(rgba(255,255,255,0.5)), to(rgba(255,255,255,0)) );
+    border: 1px solid rgb(120, 201, 252);
     width: 20px;
     height: 20px;
     margin-left: 5px;
     margin-top: 5px;
     z-index: 3;
-     -moz-border-radius: 20px; /* FF1+ */
-    -webkit-border-radius: 20px; /* Saf3+, Chrome */
-    border-radius: 20px; /* Opera 10.5, IE 9 */
+    -moz-border-radius: 5px; /* FF1+ */
+    -webkit-border-radius: 5px; /* Saf3+, Chrome */
+    border-radius: 5px; /* Opera 10.5, IE 9 */
 }
