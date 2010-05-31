@@ -69,7 +69,18 @@ window.lab = (function(lab){
      * @returns {bool} if entitykey is plr
      */
     lab.isPlr = function(lvl,state,entitykey){
-        return entitykey === '0';
+        return entitykey === '0'; // TODO - fix this shit!
+    };
+
+    /**
+     * Tests if a given entity is alive (not dead or done)
+     * @param {Object} lvl
+     * @param {Object} state
+     * @param {Object} entitykey
+     * @returns {bool} if entity is alive
+     */
+    lab.isAlive = function(lvl,state,entitykey){
+        return ["done","dead"].indexOf(lab.getEntityType(lvl,state,entitykey)) === -1;
     };
     
     /**
@@ -137,6 +148,56 @@ window.lab = (function(lab){
     };
 
     /**
+     * updates the type of an entity and makes necessary changes to state & anims
+     * @param {Object} lvl
+     * @param {Object} state
+     * @param {Object} stepanims
+     * @param {string} entitykey
+     * @param {string} type
+     * @param {int} step
+     * @returns {Object} updated state and anims
+     */
+    lab.updateEntityType = function(lvl,state,stepanims,entitykey,type){
+        state = lab.cloneObj(state);
+        state.entities[entitykey].type = type;
+        stepanims = stepanims || {changes:{}};
+        stepanims.changes[entitykey] = type;
+        if (type=="dead" || type=="done"){
+            state.entities[entitykey] = {
+                type: type,
+                x: 0,
+                y: 0,
+                dir: 0
+            };
+        }
+        return {
+            state: state,
+            stepanims: stepanims
+        };
+    };
+
+    /**
+     * updates the type of a square and makes necessary changes to state & anims
+     * @param {Object} lvl
+     * @param {Object} state
+     * @param {Object} anims
+     * @param {string} squarekey
+     * @param {string} type
+     * @returns {Object} updated state and anims
+     */
+    lab.updateSquareType = function(lvl,state,stepanims,squarekey,type){
+        state.squares = state.squares || {};
+        state.squares[squarekey] = type;
+        stepanims = stepanims || {};
+        stepanims.squares = stepanims.squares || {};
+        stepanims.squares[squarekey] = type;
+        return {
+            state: state,
+            stepanims: stepanims
+        };
+    };
+
+    /**
      * performs the given collisions and returns updated state & anims objects
      * @param {Object} lvl
      * @param {Object} state
@@ -149,11 +210,10 @@ window.lab = (function(lab){
         if (collision.key=="BORDER"){
             state.entities[collision.me].dir = 0;
         }
-        if (collision.key == "GOAL" && lab.isPlr(lvl,state,collision.me) && !state.end){
-            state.entities[collision.me].dir = 0;
-            state.end = "WIN";
-            anims[step] = anims[step] || {changes:{}};
-            anims[step].changes[collision.me] = "win";
+        if (collision.key == "GOAL" && lab.isPlr(lvl,state,collision.me)){
+            var res = lab.updateEntityType(lvl,state,anims[step],collision.me,"done");
+            state = res.state;
+            anims[step] = res.stepanims;
         }
         var c = lab.resolveObject(lvl,state,lvl.squarecollisions[collision.key],collision.me,collision["with"]);
         if (c) {
@@ -161,11 +221,9 @@ window.lab = (function(lab){
                 state.entities[collision.me].dir = 0;
             }
             if (c.setwalltype){
-                state.squares = state.squares || {};
-                state.squares[collision["with"]] = c.setwalltype;
-                anims[step] = anims[step] || {};
-                anims[step].squares = anims[step].squares || {};
-                anims[step].squares[collision["with"]] = c.setwalltype;
+                var ret = lab.updateSquareType(lvl,state,anims,collision['with'],c.setwalltype);
+                state = ret.state;
+                anims[step] = ret.stepanims;
             }
             if (c.setflag){
                 state.flags = state.flags || [];
@@ -323,7 +381,7 @@ window.lab = (function(lab){
     lab.testIfOutOfBounds = function(lvl,state,entitykey){
         var x = state.entities[entitykey].x,
             y = state.entities[entitykey].y;
-        return x> lvl.cols || x<1 || y > lvl.rows || y < 1;
+        return lab.isAlive(lvl,state,entitykey) && (x> lvl.cols || x<1 || y > lvl.rows || y < 1);
     };
     
     /**
@@ -335,6 +393,7 @@ window.lab = (function(lab){
      */
     lab.analyseMove = function(lvl, state, dir){
         var anims = {0:{slides:{}}}, movestate = lab.cloneObj(state), step = 0, before = true, movedir, sthmoving;
+        state = lab.cloneObj(state);
         // set all startdirs
         for(var e in lvl.entities){
             movedir = lab.getEntityStartDir(lvl,state,dir,e);
@@ -369,13 +428,9 @@ window.lab = (function(lab){
                         anims = collisionresult.anims;
                     }
                     if (lab.testIfOutOfBounds(lvl,movestate,e)){
-                        movestate.entities[e].type = type = "dead";
-                        movestate.entities[e].dir = 0;
-                        anims[step] = anims[step] || {changes:{}};
-                        anims[step].changes[e] = "dead";
-                        if (lab.isPlr(lvl, movestate, e)) {
-                            movestate.end = "GAMEOVER";
-                        }
+                        var ret = lab.updateEntityType(lvl,movestate,anims[step],e,"dead");
+                        movestate = ret.state;
+                        anims[step] = ret.stepanims;
                     }
                     if (movestate.entities[e].dir){ // we're still on the move! :)
                         sthmoving = true;
@@ -500,6 +555,55 @@ window.lab = (function(lab){
     };
     
     /**
+     * tests if a game is lost
+     * @param {Object} lvl
+     * @param {Object} state
+     * @returns {bool}
+     */
+    lab.testIfLost = function(lvl,state){
+        for(var e in state.entities){
+            if (lab.isPlr(lvl,state,e) && lab.getEntityType(lvl,state,e) == "dead"){
+                return true;
+            }
+        }
+        return false;
+    };
+    
+    /**
+     * tests if a game is won
+     * @param {Object} lvl
+     * @param {Object} state
+     * @returns {bool}
+     */
+    lab.testIfWon = function(lvl,state){
+        for(var e in state.entities){ // TODO - all plrs, or just 1? (right now all)
+            if (lab.isPlr(lvl,state,e) && lab.getEntityType(lvl,state,e) != "done"){
+                return false;
+            }
+        }
+        return true;
+    };
+    
+    /**
+     * looks over a state to see if we've won or lost, or if still in progress.
+     * @param {Object} lvl
+     * @param {Object} state
+     * @param {Object} objectives
+     * @returns {string} win/perfectwin/gameover/null
+     */
+    lab.checkGameState = function(lvl,state,objectives){
+        if (lab.testIfLost(lvl,state)){
+            return "GAMEOVER";
+        }
+        if (lab.testIfWon(lvl,state)){
+            if (lab.testStateForObjectives(lvl,state,objectives)){
+                return "PERFECTWIN";
+            }
+            return "WIN";
+        }
+    };
+    
+    /**
      * updates an analysis for the given state. will also recursively analyse new states reached.
      * @param {Object} lvl
      * @param {Object} state
@@ -519,7 +623,7 @@ window.lab = (function(lab){
         for (var d = 1; d <= 4; d++) {
             var moveresult, targetserialised, targetkey, end;
             moveresult = lab.analyseMove(lvl, state, d);
-            end = moveresult.state.end;
+            end = lab.checkGameState(lvl,moveresult.state,analysis.objectives);
             if (!end) { // game did not end, so we reached another state
                 targetserialised = lab.serialiseState(moveresult.state);
                 targetkey = analysis.statekeys[targetserialised];
@@ -538,8 +642,7 @@ window.lab = (function(lab){
                     });
                 }
             }
-            if (end == "WIN" && lab.testStateForObjectives(lvl,moveresult.state,analysis.objectives)){
-                end = "PERFECTWIN";
+            if (end == "PERFECTWIN"){
                 if (step<analysis.bestwin.s){
                     analysis.bestwin = {
                         k: [key],

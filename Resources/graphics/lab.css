@@ -39,7 +39,7 @@
     -webkit-border-radius: 0 20px 0 0; /* Saf3+, Chrome */
     border-radius: 0 20px 0 0; /* Opera 10.5, IE 9 */
 }
-.none { display: none; }
+.dead,.done { display: none; }
 .money { 
     background-color: yellow; 
     margin-left: 10px;

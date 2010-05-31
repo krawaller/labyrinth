@@ -141,7 +141,7 @@ window.lab = (function(lab){
                 alert("You reached the goal! Too bad you didn't fulfil all objectives, dumbass!");
             }
             else { // died
-                alert("Game over!");
+                alert(currentanims.target);
             }
         }
         else {
