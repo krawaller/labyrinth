@@ -70,7 +70,7 @@ window.lab = (function(lab){
     lab.events = {
         touchstart: 'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown',
         touchmove: 'ontouchmove' in document.documentElement ? 'touchmove' : 'mousemove',
-        touchend: 'ontouchend' in document.documentElement ? 'touchend' : 'mouseup',
+        touchend: 'ontouchend' in document.documentElement ? 'touchend' : 'mouseup'
     };
 
     lab.playLevel = function(lvl){
@@ -91,7 +91,7 @@ window.lab = (function(lab){
             touch = (tmp = e.changedTouches ? e.changedTouches[0] : e) && {
                 pageX: tmp.pageX,
                 pageY: tmp.pageY
-            }
+            };
         }, false);
 
         document.addEventListener(lab.events.touchmove, function(e){
