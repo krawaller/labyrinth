@@ -3,6 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 	<title>Labyrinth demo</title>
     <script src="../js/json2.js" type="text/javascript"></script>
    	<script src="../js/jquery-1.4.2.js" type="text/javascript"></script>
@@ -11,7 +12,11 @@
     <link rel="stylesheet" type="text/css" href="../graphics/lab.css" />
 </head>
 <body>
-<div id="main"></div>
+<div class="tableWrapper wrapper">
+    <div class="cellWrapper wrapper">    
+        <div id="main"></div>
+    </div>
+</div>
     <script type="text/javascript">
 var lvl = {
 	title: "testlevel",
@@ -103,8 +108,8 @@ var lvl2 = {
         "6_5": "key",
         "4_2": "tele",
         "3_4": "tele2",
-        "3_2": "oneway",
-        "7_4": "pipe"
+        "3_2": "oneway_left",
+        "7_4": "pipe_nw"
 	},
 	entities: [{
 		type: "plr",
@@ -147,7 +152,7 @@ var lvl2 = {
         },
         "plr-ice1":{
             stop: true,
-            setwalltype: "none"
+            setwalltype: "ice0"
         },
         "plr-key":{
             setwalltype: "none",
@@ -169,13 +174,31 @@ var lvl2 = {
                 }
             }]
         },
-        "plr-oneway":{
+        "plr-oneway_top":{
+            conds: [{
+                'if': {"diris":1},
+                'else': {stop: true}
+            }]
+        },
+        "plr-oneway_right":{
+            conds: [{
+                'if': {"diris":2},
+                'else': {stop: true}
+            }]
+        },
+        "plr-oneway_bottom":{
+            conds: [{
+                'if': {"diris":3},
+                'else': {stop: true}
+            }]
+        },
+        "plr-oneway_left":{
             conds: [{
                 'if': {"diris":4},
                 'else': {stop: true}
             }]
         },
-        "plr-pipe":{
+        "plr-pipe_sw":{
             conds: [{
                 'if': {"diris":1},
                 'then': {on:true,"setdir":4}
@@ -187,6 +210,51 @@ var lvl2 = {
                 'then': {stop:true}
             },{
                 'if': {"diris":4},
+                'then': {stop:true}
+            }]
+        },
+        "plr-pipe_se":{
+            conds: [{
+                'if': {"diris":1},
+                'then': {on:true,"setdir":2}
+            },{
+                'if': {"diris":4},
+                'then': {on:true,"setdir":3}
+            },{
+                'if': {"diris":2},
+                'then': {stop:true}
+            },{
+                'if': {"diris":3},
+                'then': {stop:true}
+            }]
+        },
+        "plr-pipe_nw":{
+            conds: [{
+                'if': {"diris":2},
+                'then': {on:true,"setdir":1}
+            },{
+                'if': {"diris":3},
+                'then': {on:true,"setdir":4}
+            },{
+                'if': {"diris":1},
+                'then': {stop:true}
+            },{
+                'if': {"diris":4},
+                'then': {stop:true}
+            }]
+        },
+        "plr-pipe_ne":{
+            conds: [{
+                'if': {"diris":4},
+                'then': {on:true,"setdir":1}
+            },{
+                'if': {"diris":3},
+                'then': {on:true,"setdir":2}
+            },{
+                'if': {"diris":1},
+                'then': {stop:true}
+            },{
+                'if': {"diris":2},
                 'then': {stop:true}
             }]
         }
