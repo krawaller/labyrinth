@@ -79,6 +79,13 @@ window.lab = (function(lab){
         document.onkeyup = lab.pressedKey;
         
         lab.initSwiping();
+        if(window.Ti){
+            Ti.App.addEventListener('move', function(e){
+                if(lab.testIfReceiving()){
+                    lab.moveInDir(e.dir);
+                }    
+            });
+        }
     };
     
     lab.initSwiping = function(){
