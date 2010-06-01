@@ -1,22 +1,65 @@
-Ti.UI.setBackgroundColor('#000');
+Ti.UI.setBackgroundColor('#fff');
 
-var mainWin = Ti.UI.createWindow();
+var tabGroup = Ti.UI.createTabGroup();
+var mainWin = Ti.UI.createWindow({
+    title: 'Labyrinth',
+    tabBarHidden: true
+});
+var mainTab = Ti.UI.createTab({
+    icon: '',
+    title: 'Labyrinth',
+    window: mainWin
+});
+tabGroup.addTab(mainTab);
+tabGroup.open();
 
-var baseUrl = 'http://79.99.1.153/labyrinth/Resources/';
-
-var xhr = Ti.Network.createHTTPClient();
-xhr.onload = function(){
-    var html = this.responseText.replace(/(src|href)="\.\.\/(.*?)\"/g, '$1="' + baseUrl + '$2"');
-    Ti.API.info(html);
-    var webview = Ti.UI.createWebView({
-        html: html
+var localButton = Ti.UI.createButton({
+    title: 'Local',
+    top: 50,
+    height: 30,
+    width: 200
+});
+mainWin.add(localButton);
+localButton.addEventListener('click', function(){
+    var gameWin = Ti.UI.createWindow({
+        tabBarHidden: true
     });
-    mainWin.add(webview);
-    mainWin.open();
-}
+    var webview = Ti.UI.createWebView({
+        url: 'test/demo.html'
+    });
+    gameWin.add(webview);
+    mainTab.open(gameWin);
+});
 
-xhr.open('GET', 'http://79.99.1.153/labyrinth/Resources/test/demo.html');
-xhr.send();
+var remoteButton = Ti.UI.createButton({
+    title: 'Remote',
+    top: 100,
+    height: 30,
+    width: 200
+});
+mainWin.add(remoteButton);
+remoteButton.addEventListener('click', function(){
+    var baseUrl = 'http://79.99.1.153/labyrinth/Resources/';
+    var xhr = Ti.Network.createHTTPClient();
+    xhr.onload = function(){
+        var gameWin = Ti.UI.createWindow({
+            tabBarHidden: true
+        });
+        
+        var html = this.responseText.replace(/(src|href)="\.\.\/(.*?)\"/g, '$1="' + baseUrl + '$2"');
+        var webview = Ti.UI.createWebView({
+            html: html
+        });
+        gameWin.add(webview);
+        mainTab.open(gameWin);
+    }
+    
+    xhr.open('GET', 'http://79.99.1.153/labyrinth/Resources/test/demo.html');
+    xhr.send();
+});
+
+
+
 
 var threshold = 0.25;
 Ti.Accelerometer.addEventListener('update', function(e){

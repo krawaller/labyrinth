@@ -1,6 +1,10 @@
 window.lab = (function(lab){
 
     var squaresize = 30;
+    var transitions = typeof WebKitTransitionEvent == 'object';
+    function xyToTransform(x,y){
+        return 'translate3d(' + x + 'px, ' + y + 'px, 0px)'; 
+    }
 
     /**
      * Parses a string for coordinates
@@ -42,13 +46,23 @@ window.lab = (function(lab){
             maze.append(border);
         }
         for(var e in lvl.entities){
-            var entity = $("<div>")
-                         .addClass("entity")
-                         .attr("id","entity"+e)
-                         .css({
-                             top: (lvl.entities[e].y-1)*squaresize,
-                             left: (lvl.entities[e].x-1)*squaresize
-                         });
+            var x = (lvl.entities[e].x-1)*squaresize,
+                y = (lvl.entities[e].y-1)*squaresize,
+                entity = $("<div>")
+                         .addClass('entity')
+                         .attr("id","entity"+e).append(
+                            $('<div>')
+                         );
+                         
+            if(transitions){
+                entity.css('-webkit-transform', xyToTransform(x,y));
+                entity.data('pos', {x:x,y:y});
+            } else {
+                entity.css({
+                    top: y,
+                    left: x
+                });
+            }
             maze.append(entity);
         }
         for(var s in lvl.squares){
@@ -79,6 +93,8 @@ window.lab = (function(lab){
         document.onkeyup = lab.pressedKey;
         
         lab.initSwiping();
+        lab.initBounce();
+        
         if(window.Ti){
             Ti.App.addEventListener('move', function(e){
                 if(lab.testIfReceiving()){
@@ -86,6 +102,20 @@ window.lab = (function(lab){
                 }    
             });
         }
+    };
+    
+    lab.initBounce = function(){
+        /*window.addEventListener('webkitTransitionEnd', function(e){
+            $el = $(e.target);
+            if (e.target.childNodes.length) {
+                e.target.childNodes[0].className = 'bounce_' + $el.data('dir');
+            }
+        }, false);*/
+        
+        window.addEventListener('webkitAnimationEnd', function(e){
+            e.target.className = '';
+        }, false);
+         
     };
     
     lab.initSwiping = function(){
@@ -130,6 +160,11 @@ window.lab = (function(lab){
                 touch = t;
             }
         }, false);
+        
+        document.addEventListener(lab.events.touchend, function(e){
+            e.preventDefault();
+            touch = false;
+        }, false);
     };
 
     lab.moveInDir = function(dir){
@@ -161,19 +196,56 @@ window.lab = (function(lab){
         if (currentanims[currentstep]){
             var a = currentanims[currentstep];
             if (a.teles){
-                for (e in a.teles){
-                    $("#entity" + e).stop().css({
-                        top: (a.teles[e].y - 1) * squaresize,
-                        left: (a.teles[e].x - 1) * squaresize
-                    });
+                if (transitions) {
+                    for (e in a.teles) {
+                        var $el = $("#entity" + e),
+                            el = $el[0],
+                            x = (a.teles[e].x - 1) * squaresize,
+                            y = (a.teles[e].y - 1) * squaresize;
+                        
+                        el.style.webkitTransition = 'none';
+                        
+                        //FIXME
+                        // Eeeh... this line makes the transition behave (sometimes). 
+                        // Should solve with timeouts or something instead.
+                        console.log('humbug'); 
+                        
+                        el.style.webkitTransform = 'translate3d(' + x + 'px, ' + y + 'px, 0px)';
+                    }
+                } else {
+                    for (e in a.teles) {
+                        $("#entity" + e).stop().css({
+                            top: (a.teles[e].y - 1) * squaresize,
+                            left: (a.teles[e].x - 1) * squaresize
+                        });
+                    }
                 }
             }
             if (a.slides) {
-                for (e in a.slides) {
-                    $("#entity" + e).animate({
-                        top: (a.slides[e].y - 1) * squaresize,
-                        left: (a.slides[e].x - 1) * squaresize
-                    }, a.slides[e].sqrs * steptime);
+                if(transitions){
+                    setTimeout(function(){
+                        for (e in a.slides) {
+                            var $el = $("#entity" + e),
+                                el = $el[0],
+                                x = (a.slides[e].x - 1) * squaresize,
+                                y = (a.slides[e].y - 1) * squaresize;
+                                
+                            el.style.webkitTransition = '-webkit-transform ' + (steptime/1000 * a.slides[e].sqrs) + 's ease-in';
+                            el.style.webkitTransform = 'translate3d(' + x + 'px, ' + y + 'px, 0px)';
+                            $el.data('dir', a.slides[e].dir);
+
+                            setTimeout(function(){ 
+                                el.childNodes[0].className = 'bounce_' + $el.data('dir');
+                            }, steptime * a.slides[e].sqrs);
+                        } 
+                    }, 10);
+                } else {
+                    for (e in a.slides) {
+                        $("#entity" + e).animate({
+                            top: (a.slides[e].y - 1) * squaresize,
+                            left: (a.slides[e].x - 1) * squaresize
+                        }, a.slides[e].sqrs * steptime);
+                    } 
                 }
             }
             if (a.squares){

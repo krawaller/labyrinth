@@ -59,6 +59,7 @@ body {
 .goal { 
     text-shadow: 0px 0px 6px #ff8c28;
     color: #fd3100;
+    -webkit-animation: pulsate 1s ease-in-out 0s infinite alternate;
 }
 .goal:before {
     content: "♥";
@@ -129,9 +130,9 @@ body {
     from { -webkit-transform: rotateY(0deg); } 
     to { -webkit-transform: rotateY(360deg); }
 }
-@-webkit-keyframes pulse {
+@-webkit-keyframes pulsate {
     from { opacity: 1; -webkit-transform: scale(1); } 
-    to { opacity: 0.8; -webkit-transform: scale(0.8); }
+    to { opacity: 0.8; -webkit-transform: scale(0.7); }
 }
 .oneway_top, .oneway_right, .oneway_bottom, .oneway_left { 
     color: #fd3100; 
@@ -204,16 +205,45 @@ body {
 }
 .key:before { content: "↾"; }
 .entity {
+    z-index: 3;    
+}
+.entity div {
     background: rgb(255, 170, 35) -webkit-gradient(radial, 40% 40%, 0, 50% 50%, 10, from(rgba(255,255,255,0.5)), to(rgba(255,255,255,0)) );
     border: 1px solid rgb(255, 201, 121);
     width: 20px;
     height: 20px;
     margin-left: 5px;
     margin-top: 5px;
-    z-index: 3;
     -moz-border-radius: 11px; /* FF1+ */
     -webkit-border-radius: 11px; /* Saf3+, Chrome */
     border-radius: 11px; /* Opera 10.5, IE 9 */
-   
-    -webkit-box-shadow: rgb(252, 201, 121) 0px 0px 8px;
+    -webkit-box-shadow: rgb(252, 201, 121) 0px 0px 8px;   
+}
+
+.bounce_1 { -webkit-animation: bounce_1 0.3s ease-out; }
+@-webkit-keyframes bounce_1 {
+    from { -webkit-transform: translate3d(0px, 0px, 0px) scaleY(1); }
+    50% { -webkit-transform: translate3d(0px, -40%, 0px) scaleY(0.6); }
+    to { -webkit-transform: translate3d(0px, 0px, 0px) scaleY(1); }
+}
+
+.bounce_2 { -webkit-animation: bounce_2 0.3s ease-out; }
+@-webkit-keyframes bounce_2 {
+    from { -webkit-transform: translate3d(0px, 0px, 0px) scaleX(1); }
+    50% { -webkit-transform: translate3d(40%, 0px, 0px) scaleX(0.6); }
+    to { -webkit-transform: translate3d(0px, 0px, 0px) scaleX(1); }
+}
+
+.bounce_3 { -webkit-animation: bounce_3 0.3s ease-out; }
+@-webkit-keyframes bounce_3 {
+    from { -webkit-transform: translate3d(0px, 0px, 0px) scaleY(1); }
+    50% { -webkit-transform: translate3d(0px, 40%, 0px) scaleY(0.6); }
+    to { -webkit-transform: translate3d(0px, 0px, 0px) scaleY(1); }
+}
+
+.bounce_4 { -webkit-animation: bounce_4 0.3s ease-out; }
+@-webkit-keyframes bounce_4 {
+    from { -webkit-transform: translate3d(0px, 0px, 0px) scaleX(1); }
+    50% { -webkit-transform: translate3d(-40%, 0px, 0px) scaleX(0.6); }
+    to { -webkit-transform: translate3d(0px, 0px, 0px) scaleX(1); }
 }
