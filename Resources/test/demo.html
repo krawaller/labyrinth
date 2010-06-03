@@ -42,10 +42,10 @@ var lvl = {
 	},
     squarecollisions: {
         "plr-wall":{
-            stop: true
+            stop: "b"
         },
         "plr-sand":{
-            stop: true,
+            stop: "t",
             on: true
         },
         "plr-money":{
@@ -54,15 +54,15 @@ var lvl = {
         },
         "plr-bigmoney":{
             on: true,
-            stop: true,
+            stop: "b",
             setwalltype: "none"
         },
         "plr-ice2":{
-            stop: true,
+            stop: "b",
             setwalltype: "ice1"
         },
         "plr-ice1":{
-            stop: true,
+            stop: "b",
             setwalltype: "none"
         },
         "plr-key":{
@@ -77,11 +77,11 @@ var lvl = {
                 },
                 then: {
                     on: true,
-                    stop: true,
+                    stop: "b",
                     setwalltype: "none"
                 },
                 'else': {
-                    stop:true
+                    stop:"b"
                 }
             }]
         }
@@ -126,10 +126,10 @@ var lvl2 = {
             on: true
         },
         "plr-wall":{
-            stop: true
+            stop: "b"
         },
         "plr-sand":{
-            stop: true,
+            stop: "t",
             on: true
         },
         "plr-money":{
@@ -138,15 +138,15 @@ var lvl2 = {
         },
         "plr-bigmoney":{
             on: true,
-            stop: true,
+            stop: "t",
             setwalltype: "none"
         },
         "plr-ice2":{
-            stop: true,
+            stop: "b",
             setwalltype: "ice1"
         },
         "plr-ice1":{
-            stop: true,
+            stop: "b",
             setwalltype: "none"
         },
         "plr-key":{
@@ -161,7 +161,7 @@ var lvl2 = {
                 },
                 then: {
                     on: true,
-                    stop: true,
+                    stop: "b",
                     setwalltype: "none"
                 },
                 'else': {
@@ -172,7 +172,7 @@ var lvl2 = {
         "plr-oneway":{
             conds: [{
                 'if': {"diris":4},
-                'else': {stop: true}
+                'else': {stop: "b"}
             }]
         },
         "plr-pipe":{
@@ -184,10 +184,10 @@ var lvl2 = {
                 'then': {on:true,"setdir":3}
             },{
                 'if': {"diris":3},
-                'then': {stop:true}
+                'then': {stop:"b"}
             },{
                 'if': {"diris":4},
-                'then': {stop:true}
+                'then': {stop:"b"}
             }]
         }
     }
