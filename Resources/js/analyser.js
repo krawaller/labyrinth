@@ -207,10 +207,11 @@ window.lab = (function(lab){
      * @returns {Object} an object containing updated state & anims
      */
     lab.performCollision = function(lvl,state,anims,collision,step){ // collision object contains key,obj1,obj2
-        if (collision.key=="BORDER"){
+        if (collision.key=="BORDER"){ // TODO - handle more gracefully
             state.entities[collision.me].dir = 0;
+            anims[state.entities[collision.me].movestarted].slides[collision.me].stop = "b";
         }
-        if (collision.key == "GOAL" && lab.isPlr(lvl,state,collision.me)){
+        if (collision.key == "GOAL" && lab.isPlr(lvl,state,collision.me)){ // TODO - handle more gracefully
             var res = lab.updateEntityType(lvl,state,anims[step],collision.me,"done");
             state = res.state;
             anims[step] = res.stepanims;
@@ -219,9 +220,10 @@ window.lab = (function(lab){
         if (c) {
             if (c.stop) {
                 state.entities[collision.me].dir = 0;
+                anims[state.entities[collision.me].movestarted].slides[collision.me].stop = c.stop; // TODO - choose default to exclude
             }
             if (c.setwalltype){
-                var ret = lab.updateSquareType(lvl,state,anims,collision['with'],c.setwalltype);
+                var ret = lab.updateSquareType(lvl,state,anims[step],collision['with'],c.setwalltype);
                 state = ret.state;
                 anims[step] = ret.stepanims;
             }
@@ -243,7 +245,6 @@ window.lab = (function(lab){
                 state.entities[collision.me].dir = c.setdir;
             }
         }
-        // TODO - add support for non-border collisions
         return {
             state: state,
             anims: anims
@@ -393,7 +394,6 @@ window.lab = (function(lab){
      */
     lab.analyseMove = function(lvl, state, dir){
         var anims = {0:{slides:{}}}, movestate = lab.cloneObj(state), step = 0, before = true, movedir, sthmoving;
-        state = lab.cloneObj(state);
         // set all startdirs
         for(var e in lvl.entities){
             movedir = lab.getEntityStartDir(lvl,state,dir,e);
@@ -436,6 +436,9 @@ window.lab = (function(lab){
                         sthmoving = true;
                         // check if started new slide
                         if (movestate.entities[e].dir != prev.dir || movestate.entities[e].x != prev.x || movestate.entities[e].y != prev.y){
+                            if(movestate.entities[e].dir != prev.dir && movestate.entities[e].dir > 0){ // turning
+                                anims[movestate.entities[e].movestarted].slides[e].stop = "t" + movestate.entities[e].dir;
+                            }
                             movestate.entities[e].movestarted = step;
                             anims[step] = anims[step] || {};
                             anims[step].slides = anims[step].slides || {};
