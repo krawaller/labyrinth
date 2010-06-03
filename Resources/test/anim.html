@@ -1,0 +1,88 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+        <title>anim tests</title>
+        <style type="text/css" id="anim">
+            body {
+                color: #f00;
+            }
+            
+            @-webkit-keyframes move {
+                from {
+                    left: 200px;
+                }
+               
+                    
+                50% {
+                    left: 240px;
+                }
+                
+                to {
+                    left: 200px;
+                }
+            }
+            
+            @-webkit-keyframes size {
+                from {
+                    -webkit-transform: scaleX(1);
+                }
+                
+                10% {
+                    -webkit-transform: scaleX(1);
+                }
+            
+                50% {
+                    -webkit-transform: scaleX(0.8);
+                    
+                }    
+                
+                90% {
+                    -webkit-transform: scaleX(1);
+                }    
+                    
+                to {
+                    -webkit-transform: scaleX(1);
+                }
+            }
+            
+            .bounce {
+                -webkit-animation-name: move, size;
+                -webkit-animation-duration: 1s;
+                -webkit-animation-timing-function: ease-out;
+            }
+            
+            .test {
+                -webkit-transform-origin: 0.5 0.5;
+
+                -webkit-transition: all 1s ease-in;
+                
+                width: 100px;
+                height: 100px;
+                background: red;
+                
+                
+                position: absolute;
+                top: 0px;
+                left: 0px;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div class="test" id="test">
+
+        </div>
+        <script type="text/javascript">
+            document.getElementById('test').addEventListener('webkitTransitionEnd', function(e){
+                this.className += ' bounce';
+                console.log(e, this)
+            })
+            
+            setTimeout(function(){
+                document.getElementById('test').style.left = '200px';
+
+            }, 10);
+        </script>
+    </body>
+</html>
