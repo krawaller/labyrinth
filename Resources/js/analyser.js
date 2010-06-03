@@ -220,7 +220,9 @@ window.lab = (function(lab){
         if (c) {
             if (c.stop) {
                 state.entities[collision.me].dir = 0;
-                anims[state.entities[collision.me].movestarted].slides[collision.me].stop = c.stop; // TODO - choose default to exclude
+                if (c.stop != "b") {
+                    anims[state.entities[collision.me].movestarted].slides[collision.me].stop = c.stop;
+                }
             }
             if (c.setwalltype){
                 var ret = lab.updateSquareType(lvl,state,anims[step],collision['with'],c.setwalltype);
