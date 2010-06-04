@@ -115,7 +115,10 @@ var lvl2 = {
 		type: "plr",
 		x: 2,
 		y: 4
-	}],
+	},{ type: "plr",
+        x: 3,
+        y: 1
+    }],
 	types: {
 		"plr": {
 			move: "grav"
@@ -139,12 +142,12 @@ var lvl2 = {
         },
         "plr-money":{
             on: true,
-            setwalltype: "none"
+            setwalltype: "done"
         },
         "plr-bigmoney":{
             on: true,
             stop: "t",
-            setwalltype: "none"
+            setwalltype: "done"
         },
         "plr-ice2":{
             stop: "b",

@@ -69,7 +69,7 @@ window.lab = (function(lab){
      * @returns {bool} if entitykey is plr
      */
     lab.isPlr = function(lvl,state,entitykey){
-        return entitykey === '0'; // TODO - fix this shit!
+        return lab.getEntityType(lvl,state,entitykey)==="plr"; // TODO - fix this shit!
     };
 
     /**
@@ -161,6 +161,7 @@ window.lab = (function(lab){
         state = lab.cloneObj(state);
         state.entities[entitykey].type = type;
         stepanims = stepanims || {changes:{}};
+        stepanims.changes = stepanims.changes || {};
         stepanims.changes[entitykey] = type;
         if (type=="dead" || type=="done"){
             state.entities[entitykey] = {
@@ -335,7 +336,7 @@ window.lab = (function(lab){
      */
     lab.getEntityType = function(lvl, state, entitykey){
         var type;
-        type = state.entities[entitykey].type || lvl.entities[entitykey].type;
+        type = (state && state.entities[entitykey].type) || lvl.entities[entitykey].type;
         // TODO - add support for conditionals
         return type;
     };
@@ -475,6 +476,11 @@ window.lab = (function(lab){
                 return false;
             }
         }
+        for(var e in objectives.entities){
+            if (lab.getEntityType(lvl,state,e)!=objectives.entities[e]){
+                return false;
+            }
+        }
         return true;
         // TODO: add support for other kind of objectives
     };
@@ -484,10 +490,15 @@ window.lab = (function(lab){
      * @param {Object} lvl
      */
     lab.findObjectives = function(lvl){
-        var ret = {squares:{}};
+        var ret = {squares:{},entities:{}};
         for(var s in lvl.squares){
             if (["money","bigmoney"].indexOf(lvl.squares[s])!=-1){
-                ret.squares[s] = "none";
+                ret.squares[s] = "done";
+            }
+        }
+        for(var e in lvl.entities){
+            if (lab.isPlr(lvl,0,e)){
+                ret.entities[e] = "done";
             }
         }
         return ret;
