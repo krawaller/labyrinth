@@ -174,6 +174,11 @@ window.lab = (function(lab){
                     $("#s"+s).attr("class","square "+a.squares[s]);
                 }
             }
+            if (a.changes){
+                for (e in a.changes){
+                    $("#entity"+e).addClass(a.changes[e]); // TODO - handle more clever? effects?
+                }
+            }
         }
         if (currentstep<=currentanims.steps){
             currentstep++;
@@ -193,11 +198,30 @@ window.lab = (function(lab){
                 alert("You reached the goal! Too bad you didn't fulfil all objectives, dumbass!");
             }
             else { // died
-                alert(currentanims.target);
+                alert("GAME OVER! boo!");
             }
         }
         else {
             currentstate = currentanims.target;
+            // eventual entity swapping.
+            if (currentanims.swaps){
+                var me,saved = {};
+                for(e in currentanims.swaps){
+                    me = $("#entity" + e);
+                    saved[e] = {
+                        top: me.css("top"),
+                        left: me.css("left"),
+                        cssclass: me.attr("class")
+                    };
+                }
+                for(e in currentanims.swaps) {
+                    $("#entity" + e).stop().css({
+                        top: saved[currentanims.swaps[e]].top,
+                        left: saved[currentanims.swaps[e]].left
+                    }).attr("class",saved[currentanims.swaps[e]].cssclass);
+                }
+            }
+console.log("arrived at "+currentstate);
             lab.startReceiving();
         }
     };

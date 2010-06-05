@@ -69,7 +69,7 @@ window.lab = (function(lab){
      * @returns {bool} if entitykey is plr
      */
     lab.isPlr = function(lvl,state,entitykey){
-        return lab.getEntityType(lvl,state,entitykey)==="plr"; // TODO - fix this shit!
+        return true; // lab.getEntityType(lvl,state,entitykey)==="plr"; // TODO - fix this shit!
     };
 
     /**
@@ -319,9 +319,9 @@ window.lab = (function(lab){
             delete state.entities[e].movestarted;
             delete state.entities[e].pushing;
             delete state.entities[e].pushedby;
-            if (state.entities[e].type == lvl.entities[e].type){
+           /* if (state.entities[e].type == lvl.entities[e].type){
                 delete state.entities[e].type; // only need to store type in state if different from starttype
-            }
+            } */
         }
         return state;
     };
@@ -336,7 +336,7 @@ window.lab = (function(lab){
      */
     lab.getEntityType = function(lvl, state, entitykey){
         var type;
-        type = (state && state.entities[entitykey].type) || lvl.entities[entitykey].type;
+        type = (state && state.entities && state.entities[entitykey] && state.entities[entitykey].type) || lvl.entities[entitykey].type;
         // TODO - add support for conditionals
         return type;
     };
@@ -365,7 +365,7 @@ window.lab = (function(lab){
      */
     lab.getEntityStartDir = function(lvl, state, dir, entitykey){
         var ret = 0, type = lab.getEntityType(lvl,state,entitykey);
-        if (type == "dead"){
+        if (type == "dead" || type=="done"){
             return 0;
         }
         if (lvl.types[type].move === "grav"){
@@ -430,7 +430,7 @@ window.lab = (function(lab){
                         movestate = collisionresult.state;
                         anims = collisionresult.anims;
                     }
-                    if (lab.testIfOutOfBounds(lvl,movestate,e)){
+                    if (lab.isAlive(lvl,movestate,e) && lab.testIfOutOfBounds(lvl,movestate,e)){
                         var ret = lab.updateEntityType(lvl,movestate,anims[step],e,"dead");
                         movestate = ret.state;
                         anims[step] = ret.stepanims;
@@ -459,9 +459,51 @@ window.lab = (function(lab){
         }
         while(sthmoving);
         anims.steps = step;
+        // check if we can swap entities to lessen states. TODO - support multiple kinds of entities
+        if (lab.stillPlaying(lvl,movestate)) { // only need to do this if game will keep going
+            ret = lab.sortEntities(movestate.entities);
+            if (ret.nbr){
+                movestate.entities = ret.sorted;
+                anims.swaps = ret.changed;
+            }
+        }
+        //return the result
         return {
             state: lab.removeNonSaveStateProperties(lvl,movestate),
             anims: anims
+        };
+    };
+    
+    /**
+     * Sorts the entities, used to lessen states
+     * @param {Array} entities
+     * @returns object with new entity array and list of swaps, and number of swaps made
+     */
+    lab.sortEntities = function(entities){
+        var sorted = lab.cloneObj(entities), changed = {}, nbr = 0;
+        for(var e in sorted){
+            sorted[e].prev = Number(e);
+        }
+        sorted.sort(function(a,b){
+            return a.type > b.type ? 1 :
+                   a.type < b.type ? -1 : 
+                   a.x > b.x ? 1 : 
+                   a.x < b.x ? -1 : 
+                   a.y > b.y ? 1 :
+                   a.y < b.y ? -1 : 
+                   0;
+        });
+        for(e in sorted){
+            if (Number(e) != sorted[e].prev){
+                nbr++;
+                changed[e] = sorted[e].prev;
+            }
+            delete sorted[e].prev;
+        }
+        return {
+            sorted: sorted,
+            changed: changed,
+            nbr: nbr
         };
     };
     
@@ -531,11 +573,12 @@ window.lab = (function(lab){
      * @returns {Object} state
      */
     lab.buildStartState = function(lvl){
-        var state = {entities:{}};
+        var state = {entities:[]};
         for(var e in lvl.entities){
             state.entities[e] = {
                 x : lvl.entities[e].x,
-                y : lvl.entities[e].y
+                y : lvl.entities[e].y,
+                type: lvl.entities[e].type
             };
         }
         // TODO - build start state for lvl
@@ -571,33 +614,33 @@ window.lab = (function(lab){
     };
     
     /**
-     * tests if a game is lost
+     * nbr of escaped entities
      * @param {Object} lvl
      * @param {Object} state
-     * @returns {bool}
+     * @returns {int} how many entities that escaped
      */
-    lab.testIfLost = function(lvl,state){
+    lab.nbrOfEscapedEntities = function(lvl,state){
+        var nbr = 0;
         for(var e in state.entities){
-            if (lab.isPlr(lvl,state,e) && lab.getEntityType(lvl,state,e) == "dead"){
+            if (lab.isPlr(lvl,state,e) && lab.getEntityType(lvl,state,e) == "done"){
+                nbr++;
+            }
+        }
+        return nbr;
+    };
+    
+    /**
+     * tests if any plr entity is still playing
+     * @param {Object} lvl
+     * @param {Object} state
+     */
+    lab.stillPlaying = function(lvl,state){
+        for(var e in state.entities){
+            if (lab.isPlr(lvl,state,e) && lab.isAlive(lvl,state,e)){
                 return true;
             }
         }
         return false;
-    };
-    
-    /**
-     * tests if a game is won
-     * @param {Object} lvl
-     * @param {Object} state
-     * @returns {bool}
-     */
-    lab.testIfWon = function(lvl,state){
-        for(var e in state.entities){ // TODO - all plrs, or just 1? (right now all)
-            if (lab.isPlr(lvl,state,e) && lab.getEntityType(lvl,state,e) != "done"){
-                return false;
-            }
-        }
-        return true;
     };
     
     /**
@@ -608,11 +651,11 @@ window.lab = (function(lab){
      * @returns {string} win/perfectwin/gameover/null
      */
     lab.checkGameState = function(lvl,state,objectives){
-        if (lab.testIfLost(lvl,state)){
-            return "GAMEOVER";
-        }
-        if (lab.testIfWon(lvl,state)){
-            if (lab.testStateForObjectives(lvl,state,objectives)){
+        if (!lab.stillPlaying(lvl, state)) {
+            if (!lab.nbrOfEscapedEntities(lvl, state)) {
+                return "GAMEOVER";
+            }
+            if (lab.testStateForObjectives(lvl, state, objectives)) {
                 return "PERFECTWIN";
             }
             return "WIN";
