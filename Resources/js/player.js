@@ -221,7 +221,6 @@ window.lab = (function(lab){
                     }).attr("class",saved[currentanims.swaps[e]].cssclass);
                 }
             }
-console.log("arrived at "+currentstate);
             lab.startReceiving();
         }
     };
