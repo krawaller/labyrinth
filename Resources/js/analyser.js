@@ -69,7 +69,7 @@ window.lab = (function(lab){
      * @returns {bool} if entitykey is plr
      */
     lab.isPlr = function(lvl,state,entitykey){
-        return true; // lab.getEntityType(lvl,state,entitykey)==="plr"; // TODO - fix this shit!
+        return true; // state.entities[entitykey].type==="plr"; // TODO - fix this shit!
     };
 
     /**
@@ -80,7 +80,7 @@ window.lab = (function(lab){
      * @returns {bool} if entity is alive
      */
     lab.isAlive = function(lvl,state,entitykey){
-        return ["done","dead"].indexOf(lab.getEntityType(lvl,state,entitykey)) === -1;
+        return ["done","dead"].indexOf(state.entities[entitykey].type) === -1;
     };
     
     /**
@@ -96,7 +96,7 @@ window.lab = (function(lab){
             dir = state.entities[entitykey].dir,
             x = state.entities[entitykey].x, 
             y = state.entities[entitykey].y, 
-            type = lab.getEntityType(lvl,state,entitykey),
+            type = state.entities[entitykey].type,
             otherkey,
             othertype;
         if (before){ // borders, and next square with nextto prop
@@ -125,7 +125,7 @@ window.lab = (function(lab){
         else { // current square and entities on same square
             otherkey = x+"_"+y;
             othertype = lab.getSquareType(lvl,state,otherkey);
-            if (othertype == "goal" && lab.isPlr(lvl,state,entitykey)) {
+            if (othertype == "goal" && lab.isPlr(lvl,state,entitykey)) { // TODO - really need special GOAL case here?
                 collisions.push({
                     key: "GOAL"
                 });
@@ -328,30 +328,15 @@ window.lab = (function(lab){
     
     
     /**
-     * calculates what type a given entity is at this moment
-     * @param {Object} lvl
-     * @param {Object} state
-     * @param {string} entitykey
-     * @returns {string} type
-     */
-    lab.getEntityType = function(lvl, state, entitykey){
-        var type;
-        type = (state && state.entities && state.entities[entitykey] && state.entities[entitykey].type) || lvl.entities[entitykey].type;
-        // TODO - add support for conditionals
-        return type;
-    };
-    
-    /**
      * calculates what type a given Square is at this moment
      * @param {Object} lvl
      * @param {Object} state
      * @param {string} squarekey
      * @returns {string} type
      */
-    lab.getSquareType = function(lvl, state, squarekey){
+    lab.getSquareType = function(lvl, state, squarekey){ // TODO - remove need for this
         var type;
         type = state && state.squares && state.squares[squarekey] ? state.squares[squarekey] : lvl.squares[squarekey];
-        // TODO - add support for conditionals
         return type;
     };
     
@@ -364,7 +349,7 @@ window.lab = (function(lab){
      * @returns {int} dir
      */
     lab.getEntityStartDir = function(lvl, state, dir, entitykey){
-        var ret = 0, type = lab.getEntityType(lvl,state,entitykey);
+        var ret = 0, type = state.entities[entitykey].type;
         if (type == "dead" || type=="done"){
             return 0;
         }
@@ -519,7 +504,7 @@ window.lab = (function(lab){
             }
         }
         for(var e in objectives.entities){
-            if (lab.getEntityType(lvl,state,e)!=objectives.entities[e]){
+            if (state.entities[e].type!=objectives.entities[e]){
                 return false;
             }
         }
@@ -622,7 +607,7 @@ window.lab = (function(lab){
     lab.nbrOfEscapedEntities = function(lvl,state){
         var nbr = 0;
         for(var e in state.entities){
-            if (lab.isPlr(lvl,state,e) && lab.getEntityType(lvl,state,e) == "done"){
+            if (lab.isPlr(lvl,state,e) && state.entities[e].type == "done"){
                 nbr++;
             }
         }
