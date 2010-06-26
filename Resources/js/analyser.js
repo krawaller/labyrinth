@@ -263,7 +263,7 @@ window.lab = (function(lab){
      * @param {Object} otherkey
      */
     lab.resolveConditions = function(lvl,state,conds,entitykey,otherkey){
-        for(var c in conds){
+        for(var c in conds){ // TODO - add support for more condition types
             if (c == "hasflag"){
                 if (!state.flags || state.flags.indexOf(conds[c])==-1){
                     return false;
@@ -469,7 +469,7 @@ window.lab = (function(lab){
         for(var e in sorted){
             sorted[e].prev = Number(e);
         }
-        sorted.sort(function(a,b){
+        sorted.sort(function(a,b){ // TODO - if we add entityspecific flags, add support for that here
             return a.type > b.type ? 1 :
                    a.type < b.type ? -1 : 
                    a.x > b.x ? 1 : 
@@ -538,7 +538,7 @@ window.lab = (function(lab){
      * @returns {Object} analysis
      */
     lab.analyseLevel = function(lvl){
-        var analysis = {
+        var startanalysis = {
             statekeys: {
                 nbrofstates: 0
             },
@@ -548,9 +548,38 @@ window.lab = (function(lab){
                 f: [],
                 s: 666
             }
-        };
-        return lab.analyse(lvl, lab.buildStartState(lvl), analysis, 0).analysis;
+        }, lvlanalysis = lab.analyse(lvl, lab.buildStartState(lvl), startanalysis, 0).analysis;
+        lvlanalysis.solution = lab.findSolution(lvlanalysis);
+        return lvlanalysis;
     };
+    
+    /**
+     * Returns array with moves showing how to perfectly solve a level
+     * @param {Object} analysis
+     * @returns {Array} array with directions
+     */
+     lab.findSolution = function(analysis){ // TODO - break if no solution exists
+         var sol = [], cur = analysis.bestwin.k[0], next, steps, dir, i = analysis.bestwin.s-2;
+         for(var m=1; m<=4; m++){ // adding the final step
+             if (analysis.states[cur].moves[m].target === "PERFECTWIN" && !sol.length){
+                 sol[i+1] = m;
+             }
+         }
+         while(i>-1){
+             steps = 66666;            
+             for(var f = 0; f<analysis.states[cur].from.length; f++){
+                  if (analysis.states[analysis.states[cur].from[f].k].steps < steps){
+                      next = analysis.states[cur].from[f].k;
+                      steps = analysis.states[next].steps;
+                      dir = analysis.states[cur].from[f].d;
+                  }
+             }
+             sol[i] = dir;
+             cur = next;
+             i--;
+         }
+         return sol;
+     };
     
     /**
      * Build a starting state object for a given level
