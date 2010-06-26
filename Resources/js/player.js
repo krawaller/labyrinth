@@ -17,6 +17,26 @@
     };
 
     /**
+     * Fixes position and css class for all entities and squares according to a state
+     * @param {Object} state
+     * @param {Number} statenumber
+     */
+	lab.renderState = function(lvl,state){
+        for(var e in lvl.entities){
+            var edata = state.state.entities[e];
+            $("#entity"+e).css({
+                top: (edata.y-1)*squaresize,
+                left: (edata.x-1)*squaresize
+            }).attr("class","entity");
+        }
+        for(var s in lvl.squares){
+            $("#s"+s).attr("class","square "+lab.getSquareType(lvl,state,s))
+        }
+        currentstate = 1;
+        nbrofmoves = 0;
+	};
+
+    /**
      * Builds the level objects in the given container
      * @param {Object} lvl
      * @param {string} containerid
@@ -46,17 +66,13 @@
             var entity = $("<div>")
                          .addClass("entity")
                          .attr("id","entity"+e)
-                         .css({
-                             top: (lvl.entities[e].y-1)*squaresize,
-                             left: (lvl.entities[e].x-1)*squaresize
-                         });
             maze.append(entity);
         }
         for(var s in lvl.squares){
             coords = lab.getCoords(s);
             square = $("<div>")
                      .addClass("square")
-                     .addClass(lab.getSquareType(lvl,0,s))
+                    // .addClass(lab.getSquareType(lvl,0,s))
                      .attr("id","s"+s)
                      .css({
                          top: (coords.y-1)*squaresize, 
@@ -66,7 +82,7 @@
         }
     };
 
-    var analysis, currentstate = 1, animating, currentanims, currentstep = 0, nbrofmoves = 0;
+    var level, analysis, currentstate = 1, animating, currentanims, currentstep = 0, nbrofmoves = 0;
 
     lab.events = {
         touchstart: 'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown',
@@ -77,8 +93,9 @@
     lab.playLevel = function(lvl){
         lab.buildLevel(lvl,"main");
         analysis = lab.analyseLevel(lvl);
+        level = lvl;
+        lab.renderState(lvl,analysis.states[1]);
         document.onkeyup = lab.pressedKey;
-        
         lab.initSwiping();
     };
     
@@ -175,7 +192,7 @@
                     $("#s"+s).attr("class","square "+a.squares[s]);
                 }
             }
-            if (a.changes){
+            if (a.changes){ // TODO - this not used? check analyser logic!
                 for (e in a.changes){
                     $("#entity"+e).addClass(a.changes[e]); // TODO - handle more clever? effects?
                 }
@@ -201,7 +218,7 @@
             else { // died
                 alert("GAME OVER! boo!");
             }
-            
+            lab.renderState(level,analysis.states[1]);
         }
         else {
             currentstate = currentanims.target;
@@ -223,8 +240,8 @@
                     }).attr("class",saved[currentanims.swaps[e]].cssclass);
                 }
             }
-            lab.startReceiving();
         }
+        lab.startReceiving();
     };
     
     lab.testIfReceiving = function(){
