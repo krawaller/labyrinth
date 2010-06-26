@@ -1,6 +1,6 @@
-window.lab = (function(lab){
+(function(container){
 
-    var squaresize = 30;
+    var lab = container.lab || {}, squaresize = 30;
 
     /**
      * Parses a string for coordinates
@@ -23,6 +23,7 @@ window.lab = (function(lab){
      */
     lab.buildLevel = function(lvl,containerid){
         var maze = $("#"+containerid)
+                   .html("")
                    .addClass("board")
                    .css({
                        height: lvl.rows*squaresize,
@@ -65,7 +66,7 @@ window.lab = (function(lab){
         }
     };
 
-    var analysis, currentstate = 1, animating, currentanims, currentstep, nbrofmoves = 0;
+    var analysis, currentstate = 1, animating, currentanims, currentstep = 0, nbrofmoves = 0;
 
     lab.events = {
         touchstart: 'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown',
@@ -200,6 +201,7 @@ window.lab = (function(lab){
             else { // died
                 alert("GAME OVER! boo!");
             }
+            
         }
         else {
             currentstate = currentanims.target;
@@ -233,6 +235,6 @@ window.lab = (function(lab){
         animating = false;
     };
 
-    return lab;
+    container.lab = lab;
 
-})(window.lab || {});
+})(window);
