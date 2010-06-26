@@ -1,6 +1,6 @@
-window.lab = (function(lab){
+(function(global){
     
-     var fac = [666,[0,-1],[1,0],[0,1],[-1,0]];
+     var lab = global.lab || {}, fac = [666,[0,-1],[1,0],[0,1],[-1,0]];
     
     /**
      * takes a state object and serialises it
@@ -735,7 +735,7 @@ window.lab = (function(lab){
         };
     };
     
-    return lab;
+    global.lab = lab;
     
-})(window.lab || {});
+})(window);
 
