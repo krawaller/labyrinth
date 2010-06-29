@@ -165,7 +165,6 @@
         }
         lab.moveInDir({38:1,39:2,40:3,37:4}[key]);
         nbrofmoves++;
-        console.log("MOVED! "+nbrofmoves+" "+key);
     };
     
     lab.animateMoveStep = function(){
