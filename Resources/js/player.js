@@ -158,13 +158,14 @@
     };
     
     lab.pressedKey = function(evt){
-        if (!lab.testIfReceiving()){
-            return;
-        }
         evt = evt || window.event;
         var key = evt.keyCode || evt.which;
+        if (!lab.testIfReceiving() || key < 37 || key > 40){
+            return;
+        }
         lab.moveInDir({38:1,39:2,40:3,37:4}[key]);
         nbrofmoves++;
+        console.log("MOVED! "+nbrofmoves+" "+key);
     };
     
     lab.animateMoveStep = function(){
