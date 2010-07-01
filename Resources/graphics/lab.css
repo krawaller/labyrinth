@@ -171,7 +171,7 @@ body {
     -webkit-border-bottom-right-radius: 20px; /* Saf3+, Chrome */
     border-radius: 20px; /* Opera 10.5, IE 9 */
 }
-.dead,.done { display: none; }
+.dead,.done,.none { display: none; }
 .money { 
     background: #d8cf1d -webkit-gradient(radial, 40% 40%, 0, 50% 50%, 10, from(rgba(255,255,255,0.6)), to(rgba(255,255,255,0)) );
     margin-left: 10px;

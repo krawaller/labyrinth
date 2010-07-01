@@ -1,4 +1,4 @@
-window.lab = (function(lab){
+(function(container){
 
     var squaresize = 30;
     var transitions = typeof WebKitTransitionEvent == 'object';
@@ -21,12 +21,33 @@ window.lab = (function(lab){
     };
 
     /**
+     * Fixes position and css class for all entities and squares according to a state
+     * @param {Object} state
+     * @param {Number} statenumber
+     */
+	lab.renderState = function(lvl,state){
+        for(var e in lvl.entities){
+            var edata = state.state.entities[e];
+            $("#entity"+e).css({
+                top: (edata.y-1)*squaresize,
+                left: (edata.x-1)*squaresize
+            }).attr("class","entity");
+        }
+        for(var s in lvl.squares){
+            $("#s"+s).attr("class","square "+lab.getSquareType(lvl,state,s))
+        }
+        currentstate = 1;
+        nbrofmoves = 0;
+	};
+
+    /**
      * Builds the level objects in the given container
      * @param {Object} lvl
      * @param {string} containerid
      */
     lab.buildLevel = function(lvl,containerid){
         var maze = $("#"+containerid)
+                   .html("")
                    .addClass("board")
                    .css({
                        height: lvl.rows*squaresize,
@@ -69,7 +90,7 @@ window.lab = (function(lab){
             coords = lab.getCoords(s);
             square = $("<div>")
                      .addClass("square")
-                     .addClass(lab.getSquareType(lvl,0,s))
+                    // .addClass(lab.getSquareType(lvl,0,s))
                      .attr("id","s"+s)
                      .css({
                          top: (coords.y-1)*squaresize, 
@@ -79,7 +100,7 @@ window.lab = (function(lab){
         }
     };
 
-    var analysis, currentstate = 1, animating, currentanims, currentstep, nbrofmoves = 0;
+    var level, analysis, currentstate = 1, animating, currentanims, currentstep = 0, nbrofmoves = 0;
 
     lab.events = {
         touchstart: 'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown',
@@ -90,8 +111,9 @@ window.lab = (function(lab){
     lab.playLevel = function(lvl){
         lab.buildLevel(lvl,"main");
         analysis = lab.analyseLevel(lvl);
+        level = lvl;
+        lab.renderState(lvl,analysis.states[1]);
         document.onkeyup = lab.pressedKey;
-        
         lab.initSwiping();
         lab.initBounce();
         
@@ -182,11 +204,11 @@ window.lab = (function(lab){
     };
     
     lab.pressedKey = function(evt){
-        if (!lab.testIfReceiving()){
-            return;
-        }
         evt = evt || window.event;
         var key = evt.keyCode || evt.which;
+        if (!lab.testIfReceiving() || key < 37 || key > 40){
+            return;
+        }
         lab.moveInDir({38:1,39:2,40:3,37:4}[key]);
         nbrofmoves++;
     };
@@ -253,6 +275,11 @@ window.lab = (function(lab){
                     $("#s"+s).attr("class","square "+a.squares[s]);
                 }
             }
+            if (a.changes){ // TODO - this not used? check analyser logic!
+                for (e in a.changes){
+                    $("#entity"+e).addClass(a.changes[e]); // TODO - handle more clever? effects?
+                }
+            }
         }
         if (currentstep<=currentanims.steps){
             currentstep++;
@@ -272,13 +299,32 @@ window.lab = (function(lab){
                 alert("You reached the goal! Too bad you didn't fulfil all objectives, dumbass!");
             }
             else { // died
-                alert(currentanims.target);
+                alert("GAME OVER! boo!");
             }
+            lab.renderState(level,analysis.states[1]);
         }
         else {
             currentstate = currentanims.target;
-            lab.startReceiving();
+            // eventual entity swapping.
+            if (currentanims.swaps){
+                var me,saved = {};
+                for(e in currentanims.swaps){
+                    me = $("#entity" + e);
+                    saved[e] = {
+                        top: me.css("top"),
+                        left: me.css("left"),
+                        cssclass: me.attr("class")
+                    };
+                }
+                for(e in currentanims.swaps) {
+                    $("#entity" + e).stop().css({
+                        top: saved[currentanims.swaps[e]].top,
+                        left: saved[currentanims.swaps[e]].left
+                    }).attr("class",saved[currentanims.swaps[e]].cssclass);
+                }
+            }
         }
+        lab.startReceiving();
     };
     
     lab.testIfReceiving = function(){
@@ -289,6 +335,6 @@ window.lab = (function(lab){
         animating = false;
     };
 
-    return lab;
+    container.lab = lab;
 
-})(window.lab || {});
+})(window);

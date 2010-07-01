@@ -47,10 +47,10 @@ var lvl = {
 	},
     squarecollisions: {
         "plr-wall":{
-            stop: true
+            stop: "b"
         },
         "plr-sand":{
-            stop: true,
+            stop: "t",
             on: true
         },
         "plr-money":{
@@ -59,15 +59,15 @@ var lvl = {
         },
         "plr-bigmoney":{
             on: true,
-            stop: true,
+            stop: "b",
             setwalltype: "none"
         },
         "plr-ice2":{
-            stop: true,
+            stop: "b",
             setwalltype: "ice1"
         },
         "plr-ice1":{
-            stop: true,
+            stop: "b",
             setwalltype: "none"
         },
         "plr-key":{
@@ -82,11 +82,11 @@ var lvl = {
                 },
                 then: {
                     on: true,
-                    stop: true,
+                    stop: "b",
                     setwalltype: "none"
                 },
                 'else': {
-                    stop:true
+                    stop:"b"
                 }
             }]
         }
@@ -115,7 +115,12 @@ var lvl2 = {
 		type: "plr",
 		x: 2,
 		y: 4
-	}],
+	},{ type: "plr",
+        x: 5,
+        y: 3
+    },{ type: "plr",
+        x: 7,
+        y: 3}],
 	types: {
 		"plr": {
 			move: "grav"
@@ -131,27 +136,27 @@ var lvl2 = {
             on: true
         },
         "plr-wall":{
-            stop: true
+            stop: "b"
         },
         "plr-sand":{
-            stop: true,
+            stop: "t",
             on: true
         },
         "plr-money":{
             on: true,
-            setwalltype: "none"
+            setwalltype: "done"
         },
         "plr-bigmoney":{
             on: true,
-            stop: true,
-            setwalltype: "none"
+            stop: "t",
+            setwalltype: "done"
         },
         "plr-ice2":{
-            stop: true,
+            stop: "b",
             setwalltype: "ice1"
         },
         "plr-ice1":{
-            stop: true,
+            stop: "b",
             setwalltype: "ice0"
         },
         "plr-key":{
@@ -166,36 +171,36 @@ var lvl2 = {
                 },
                 then: {
                     on: true,
-                    stop: true,
+                    stop: "b",
                     setwalltype: "none"
                 },
                 'else': {
-                    stop:true
+                    stop:"b"
                 }
             }]
         },
         "plr-oneway_top":{
             conds: [{
                 'if': {"diris":1},
-                'else': {stop: true}
+                'else': {stop: "b"}
             }]
         },
         "plr-oneway_right":{
             conds: [{
                 'if': {"diris":2},
-                'else': {stop: true}
+                'else': {stop: "b"}
             }]
         },
         "plr-oneway_bottom":{
             conds: [{
                 'if': {"diris":3},
-                'else': {stop: true}
+                'else': {stop: "b"}
             }]
         },
         "plr-oneway_left":{
             conds: [{
                 'if': {"diris":4},
-                'else': {stop: true}
+                'else': {stop: "b"}
             }]
         },
         "plr-pipe_sw":{
@@ -207,10 +212,10 @@ var lvl2 = {
                 'then': {on:true,"setdir":3}
             },{
                 'if': {"diris":3},
-                'then': {stop:true}
+                'then': {stop:"b"}
             },{
                 'if': {"diris":4},
-                'then': {stop:true}
+                'then': {stop:"b"}
             }]
         },
         "plr-pipe_se":{
@@ -222,10 +227,10 @@ var lvl2 = {
                 'then': {on:true,"setdir":3}
             },{
                 'if': {"diris":2},
-                'then': {stop:true}
+                'then': {stop:"b"}
             },{
                 'if': {"diris":3},
-                'then': {stop:true}
+                'then': {stop:"b"}
             }]
         },
         "plr-pipe_nw":{
@@ -237,10 +242,10 @@ var lvl2 = {
                 'then': {on:true,"setdir":4}
             },{
                 'if': {"diris":1},
-                'then': {stop:true}
+                'then': {stop:"b"}
             },{
                 'if': {"diris":4},
-                'then': {stop:true}
+                'then': {stop:"b"}
             }]
         },
         "plr-pipe_ne":{
@@ -252,10 +257,10 @@ var lvl2 = {
                 'then': {on:true,"setdir":2}
             },{
                 'if': {"diris":1},
-                'then': {stop:true}
+                'then': {stop:"b"}
             },{
                 'if': {"diris":2},
-                'then': {stop:true}
+                'then': {stop:"b"}
             }]
         }
     }
