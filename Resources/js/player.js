@@ -97,7 +97,18 @@
         lab.renderState(lvl,analysis.states[1]);
         document.onkeyup = lab.pressedKey;
         lab.initSwiping();
+        lab.initGyro();
     };
+    
+    lab.initGyro = function(){
+        if(window.Ti){
+            Ti.App.addEventListener('move', function(e){
+                if(lab.testIfReceiving()){
+                    lab.moveInDir(e.dir);
+                }    
+            });
+        }
+    }
     
     lab.initSwiping = function(){
         var touch,
