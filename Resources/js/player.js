@@ -1,10 +1,6 @@
 (function(container){
 
-    var squaresize = 30;
-    var transitions = typeof WebKitTransitionEvent == 'object';
-    function xyToTransform(x,y){
-        return 'translate3d(' + x + 'px, ' + y + 'px, 0px)'; 
-    }
+    var lab = container.lab || {}, squaresize = 30;
 
     /**
      * Parses a string for coordinates
@@ -25,7 +21,7 @@
      * @param {Object} state
      * @param {Number} statenumber
      */
-	lab.renderState = function(lvl,state){
+    lab.renderState = function(lvl,state){
         for(var e in lvl.entities){
             var edata = state.state.entities[e];
             $("#entity"+e).css({
@@ -38,7 +34,7 @@
         }
         currentstate = 1;
         nbrofmoves = 0;
-	};
+    };
 
     /**
      * Builds the level objects in the given container
@@ -67,23 +63,9 @@
             maze.append(border);
         }
         for(var e in lvl.entities){
-            var x = (lvl.entities[e].x-1)*squaresize,
-                y = (lvl.entities[e].y-1)*squaresize,
-                entity = $("<div>")
-                         .addClass('entity')
-                         .attr("id","entity"+e).append(
-                            $('<div>')
-                         );
-                         
-            if(transitions){
-                entity.css('-webkit-transform', xyToTransform(x,y));
-                entity.data('pos', {x:x,y:y});
-            } else {
-                entity.css({
-                    top: y,
-                    left: x
-                });
-            }
+            var entity = $("<div>")
+                         .addClass("entity")
+                         .attr("id","entity"+e)
             maze.append(entity);
         }
         for(var s in lvl.squares){
@@ -115,29 +97,6 @@
         lab.renderState(lvl,analysis.states[1]);
         document.onkeyup = lab.pressedKey;
         lab.initSwiping();
-        lab.initBounce();
-        
-        if(window.Ti){
-            Ti.App.addEventListener('move', function(e){
-                if(lab.testIfReceiving()){
-                    lab.moveInDir(e.dir);
-                }    
-            });
-        }
-    };
-    
-    lab.initBounce = function(){
-        /*window.addEventListener('webkitTransitionEnd', function(e){
-            $el = $(e.target);
-            if (e.target.childNodes.length) {
-                e.target.childNodes[0].className = 'bounce_' + $el.data('dir');
-            }
-        }, false);*/
-        
-        window.addEventListener('webkitAnimationEnd', function(e){
-            e.target.className = '';
-        }, false);
-         
     };
     
     lab.initSwiping = function(){
@@ -218,56 +177,19 @@
         if (currentanims[currentstep]){
             var a = currentanims[currentstep];
             if (a.teles){
-                if (transitions) {
-                    for (e in a.teles) {
-                        var $el = $("#entity" + e),
-                            el = $el[0],
-                            x = (a.teles[e].x - 1) * squaresize,
-                            y = (a.teles[e].y - 1) * squaresize;
-                        
-                        el.style.webkitTransition = 'none';
-                        
-                        //FIXME
-                        // Eeeh... this line makes the transition behave (sometimes). 
-                        // Should solve with timeouts or something instead.
-                        console.log('humbug'); 
-                        
-                        el.style.webkitTransform = 'translate3d(' + x + 'px, ' + y + 'px, 0px)';
-                    }
-                } else {
-                    for (e in a.teles) {
-                        $("#entity" + e).stop().css({
-                            top: (a.teles[e].y - 1) * squaresize,
-                            left: (a.teles[e].x - 1) * squaresize
-                        });
-                    }
+                for (e in a.teles){
+                    $("#entity" + e).stop().css({
+                        top: (a.teles[e].y - 1) * squaresize,
+                        left: (a.teles[e].x - 1) * squaresize
+                    });
                 }
             }
             if (a.slides) {
-                if(transitions){
-                    setTimeout(function(){
-                        for (e in a.slides) {
-                            var $el = $("#entity" + e),
-                                el = $el[0],
-                                x = (a.slides[e].x - 1) * squaresize,
-                                y = (a.slides[e].y - 1) * squaresize;
-                                
-                            el.style.webkitTransition = '-webkit-transform ' + (steptime/1000 * a.slides[e].sqrs) + 's ease-in';
-                            el.style.webkitTransform = 'translate3d(' + x + 'px, ' + y + 'px, 0px)';
-                            $el.data('dir', a.slides[e].dir);
-
-                            setTimeout(function(){ 
-                                el.childNodes[0].className = 'bounce_' + $el.data('dir');
-                            }, steptime * a.slides[e].sqrs);
-                        } 
-                    }, 10);
-                } else {
-                    for (e in a.slides) {
-                        $("#entity" + e).animate({
-                            top: (a.slides[e].y - 1) * squaresize,
-                            left: (a.slides[e].x - 1) * squaresize
-                        }, a.slides[e].sqrs * steptime);
-                    } 
+                for (e in a.slides) {
+                    $("#entity" + e).animate({
+                        top: (a.slides[e].y - 1) * squaresize,
+                        left: (a.slides[e].x - 1) * squaresize
+                    }, a.slides[e].sqrs * steptime);
                 }
             }
             if (a.squares){
