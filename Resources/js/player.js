@@ -1,6 +1,12 @@
 (function(container){
 
-    var lab = container.lab || {}, squaresize = 30;
+    var lab = container.lab || {}, squaresize = 30, transitions = typeof WebKitTransitionEvent == 'object';
+    
+console.log(transitions);
+
+    function xyToTransform(x,y){
+        return 'translate3d(' + x + 'px, ' + y + 'px, 0px)'; 
+    }
 
     /**
      * Parses a string for coordinates
@@ -15,6 +21,16 @@
             y: Number(str.substr(divpos+1,666))
         };
     };
+    
+    lab.positionEntity = function(o){
+        var x = o.x, y = o.y, entity = $("#entity"+o.id);
+        if(transitions){
+            entity.css('-webkit-transform', xyToTransform(x,y));
+            entity.data('pos', {x:x,y:y});         
+        } else {
+            entity.css({ top: y, left: x });
+        }  
+    }
 
     /**
      * Fixes position and css class for all entities and squares according to a state
@@ -23,11 +39,11 @@
      */
     lab.renderState = function(lvl,state){
         for(var e in lvl.entities){
-            var edata = state.state.entities[e];
-            $("#entity"+e).css({
-                top: (edata.y-1)*squaresize,
-                left: (edata.x-1)*squaresize
-            }).attr("class","entity");
+            var edata = state.state.entities[e],
+                entity = $("#entity"+e).attr("class","entity"),
+                x = (edata.x-1)*squaresize,
+                y = (edata.y-1)*squaresize;
+            lab.positionEntity({x:x,y:y,id:e});           
         }
         for(var s in lvl.squares){
             $("#s"+s).attr("class","square "+lab.getSquareType(lvl,state,s))
@@ -66,6 +82,7 @@
             var entity = $("<div>")
                          .addClass("entity")
                          .attr("id","entity"+e)
+                         .append( $('<div>') );
             maze.append(entity);
         }
         for(var s in lvl.squares){
@@ -82,7 +99,7 @@
         }
     };
 
-    var level, analysis, currentstate = 1, animating, currentanims, currentstep = 0, nbrofmoves = 0;
+    var level, analysis, currentstate = 1, animating, currentanims, currentstep = 0, nbrofmoves = 0, controlsinitiated = false;
 
     lab.events = {
         touchstart: 'ontouchstart' in document.documentElement ? 'touchstart' : 'mousedown',
@@ -96,9 +113,17 @@
         level = lvl;
         lab.renderState(lvl,analysis.states[1]);
         document.onkeyup = lab.pressedKey;
+        if (!controlsinitiated){
+            controlsinitiated = true;
+            lab.initControls();
+        }
+    };
+    
+    lab.initControls = function(){
         lab.initSwiping();
         lab.initGyro();
-    };
+        lab.initBounce();        
+    }
     
     lab.initGyro = function(){
         if(window.Ti){
@@ -109,6 +134,19 @@
             });
         }
     }
+    
+    lab.initBounce = function(){
+        /*window.addEventListener('webkitTransitionEnd', function(e){
+            $el = $(e.target);
+            if (e.target.childNodes.length) {
+                e.target.childNodes[0].className = 'bounce_' + $el.data('dir');
+            }
+        }, false);*/
+        window.addEventListener('webkitAnimationEnd', function(e){
+            e.target.className = '';
+            console.log("MOO");
+        }, false);
+    };
     
     lab.initSwiping = function(){
         var touch,
@@ -187,20 +225,39 @@
         var steptime = 200, e;
         if (currentanims[currentstep]){
             var a = currentanims[currentstep];
-            if (a.teles){
+            
+            if (a.teles){        
                 for (e in a.teles){
-                    $("#entity" + e).stop().css({
-                        top: (a.teles[e].y - 1) * squaresize,
-                        left: (a.teles[e].x - 1) * squaresize
-                    });
+                    var $el = $("#entity" + e),
+                        el = $el[0],
+                        x = (a.teles[e].x - 1) * squaresize,
+                        y = (a.teles[e].y - 1) * squaresize;
+                    if (transitions){            
+                        el.style.webkitTransition = 'none';
+                        //FIXME
+                        // Eeeh... this line makes the transition behave (sometimes). 
+                        // Should solve with timeouts or something instead.
+                        console.log('humbug'); 
+                        el.style.webkitTransform = 'translate3d(' + x + 'px, ' + y + 'px, 0px)';
+                    } else {
+                        $("#entity" + e).stop().css({
+                            top: y,
+                            left: x
+                        });
+                    }
                 }
             }
-            if (a.slides) {
+            if (a.slides) {           
                 for (e in a.slides) {
+                    var x = (a.slides[e].x - 1) * squaresize,
+                        y = (a.slides[e].y - 1) * squaresize;
+console.log("entity "+e+" is now at Y="+$("#entity"+e).css("top")+", X="+$("#entity"+e).css("left"));
+console.log("now going to Y="+y+", X="+x);                     
                     $("#entity" + e).animate({
-                        top: (a.slides[e].y - 1) * squaresize,
-                        left: (a.slides[e].x - 1) * squaresize
+                        top: y,
+                        left: x
                     }, a.slides[e].sqrs * steptime);
+console.log("entity "+e+" started, now at Y="+$("#entity"+e).css("top")+", X="+$("#entity"+e).css("left"));
                 }
             }
             if (a.squares){
